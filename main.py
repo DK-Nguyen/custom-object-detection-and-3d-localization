@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from pathlib import Path
 
 from tools.argument_parsing import get_argument_parser
 from tools.file_io import load_yaml_file
@@ -12,13 +13,12 @@ __all__ = ['main']
 def main():
     args = get_argument_parser().parse_args()
     file_dir = args.file_dir
-    print(file_dir)
     config_file = args.config_file
-    print(config_file)
     file_ext = args.file_ext
-    print(file_ext)
     verbose = args.verbose
-    print(verbose)
+
+    print((file_dir, f'{config_file}.{file_ext}'))
+    settings = load_yaml_file(Path(file_dir, f'{config_file}.{file_ext}'))
 
     print('everything ok')
 

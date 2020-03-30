@@ -13,7 +13,7 @@ workflow:
 # ---------------------------------
 dataset_creation_settings: !include dataset_creation.yaml
 # -----------------------------------
-dnn_training_settings: !include method_MaskRCNN.yaml
+dnn_training_settings: !include method_maskRCNN.yaml
 # -----------------------------------
 dirs_and_files: !include dirs_and_files.yaml
 # EOF

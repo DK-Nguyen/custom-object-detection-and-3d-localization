@@ -11,7 +11,7 @@ __all__ = ['get_argument_parser']
 def get_argument_parser():
     """
     Creates and returns the ArgumentParser for this project.
-    Code
+    Code after: https://github.com/audio-captioning/dcase-2020-baseline/blob/master/tools/argument_parsing.py
 
     :return: The argument parser.
     :rtype: argparse.ArgumentParser
@@ -50,7 +50,5 @@ if __name__ == '__main__':
     config_file = args.config_file
     file_ext = args.file_ext
     verbose = args.verbose
-
-    a = 1
 
 # EOF
