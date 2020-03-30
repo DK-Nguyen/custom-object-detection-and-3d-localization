@@ -1,0 +1,19 @@
+# =================================
+# Dataset creation process settings.
+#
+# author: Khoa Nguyen
+# affiliation: Tampere University
+# Code after: https://github.com/audio-captioning/dcase-2020-baseline/blob/master/settings/main_settings.yaml
+# =================================
+
+workflow:
+  dataset_creation: Yes
+  dnn_training: Yes
+  dnn_evaluation: Yes
+# ---------------------------------
+dataset_creation_settings: !include dataset_creation.yaml
+# -----------------------------------
+dnn_training_settings: !include method_MaskRCNN.yaml
+# -----------------------------------
+dirs_and_files: !include dirs_and_files.yaml
+# EOF
