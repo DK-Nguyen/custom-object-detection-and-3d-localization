@@ -5,3 +5,7 @@
 .env*
 env/
 venv/
+
+# Python Tools for IDEs
+__pycache__/
+*.pyc
