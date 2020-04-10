@@ -1,10 +1,3 @@
-# =================================
-# Dataset creation process settings.
-#
-# author: Khoa Nguyen
-# affiliation: Tampere University
-# Code after: https://github.com/audio-captioning/dcase-2020-baseline/blob/master/settings/main_settings.yaml
-# =================================
 
 workflow:
   dataset_creation: Yes

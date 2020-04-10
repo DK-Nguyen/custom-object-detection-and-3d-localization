@@ -3,52 +3,66 @@
 
 from argparse import ArgumentParser
 
-__author__ = 'Khoa Nguyen -- Tampere University'
-__docformat__ = 'reStructuredText'
-__all__ = ['get_argument_parser']
+__all__ = ['argument_parser']
 
 
-def get_argument_parser():
+def argument_parser() -> ArgumentParser:
     """
-    Creates and returns the ArgumentParser for this project.
-    Code after: https://github.com/audio-captioning/dcase-2020-baseline/blob/master/tools/argument_parsing.py
+    Creates and returns the ArgumentParser
 
     :return: The argument parser.
     :rtype: argparse.ArgumentParser
     """
     arg_parser = ArgumentParser()
-    the_args = [
-        # ---------------------------------
-        [['--config-file', '-c'],
-         {'type': str,
-          'default': 'main_settings',
-          'help': 'The settings file (without extension).'}],
-        # ---------------------------------
-        [['--file-dir', '-d'],
-         {'type': str,
-          'default': 'settings',
-          'help': 'Directory that holds the settings file (default: `settings`).'}],
-        # ---------------------------------
-        [['--file-ext', '-e'],
-         {'type': str,
-          'default': 'yaml',
-          'help': 'Extension of the settings file (default: `yaml`).'}],
-        # ---------------------------------
-        [['--verbose', '-v'],
-         {'default': True,
-          'action': 'store_true',
-          'help': 'Be verbose flag (default True).'}]]
+    main_arguments = [
+        # ----------------------------------------------------------------------------------
+        [
+            ['-d', '--settings_dir'],
+            {
+                'type': str,
+                'default': 'settings',
+                'help': 'The directory that contains the setting files, default: "settings".',
+            }
+        ],
+        # ----------------------------------------------------------------------------------
+        [
+            ['-c', '--main_config'],
+            {
+                'type': str,
+                'default': 'main_settings',
+                'help': 'The main setting file name (without extension).',
+            }
+        ],
+        # ----------------------------------------------------------------------------------
+        [
+            ['-e', '--setting_ext'],
+            {
+                'type': str,
+                'default': 'yaml',
+                'help': 'The extension of the setting files, default: "yaml".',
+            }
+        ],
+        # ----------------------------------------------------------------------------------
+        [
+            ['-v', '--verbose'],
+            {
+                'default': True,
+                'action': 'store_true',
+                'help': 'Increase output verbosity, default: True.',
+            }
+        ],
+    ]
 
-    [arg_parser.add_argument(*i[0], **i[1]) for i in the_args]
+    [arg_parser.add_argument(*i[0], **i[1]) for i in main_arguments]
 
     return arg_parser
 
 
 if __name__ == '__main__':
-    args = get_argument_parser().parse_args()
-    file_dir = args.file_dir
-    config_file = args.config_file
-    file_ext = args.file_ext
+    args = argument_parser().parse_args()
+    settings_dir = args.settings_dir
+    main_config = args.main_config
+    setting_ext = args.setting_ext
     verbose = args.verbose
 
 # EOF

@@ -1,28 +1,36 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
 from pathlib import Path
 
-from tools.argument_parsing import get_argument_parser
+from tools.argument_parsing import argument_parser
 from tools.file_io import load_yaml_file
+from tools.log_info import init_loggers
 
-__author__ = 'Khoa Nguyen -- Tampere University'
-__docformat__ = 'reStructuredText'
 __all__ = ['main']
 
 
 def main():
-    args = get_argument_parser().parse_args()
-    file_dir = args.file_dir
-    config_file = args.config_file
-    file_ext = args.file_ext
+    args = argument_parser().parse_args()
+    settings_dir = args.settings_dir
+    main_config = args.main_config
+    setting_ext = args.setting_ext
     verbose = args.verbose
 
-    print((file_dir, f'{config_file}.{file_ext}'))
-    settings = load_yaml_file(Path(file_dir, f'{config_file}.{file_ext}'))
+    settings = load_yaml_file(Path(settings_dir, f'{main_config}.{setting_ext}'))
 
-    print('everything ok')
+    # init_loggers(verbose,
+    #              settings=settings['dirs_and_files'])
+
+    if settings['workflow']['dataset_creation']:
+        print('datatset creating')
+
+    print(settings)
 
 
 if __name__ == '__main__':
     main()
+
+    print('end of main')
+# EOF
 

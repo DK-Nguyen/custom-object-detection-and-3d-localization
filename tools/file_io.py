@@ -6,9 +6,6 @@ import os
 from pathlib import Path
 from typing import Dict
 
-
-__author__ = 'Khoa Nguyen -- Tampere University'
-__docformat__ = 'reStructuredText'
 __all__ = ['load_yaml_file']
 
 
@@ -34,11 +31,9 @@ class YAMLLoader(yaml.SafeLoader):
 YAMLLoader.add_constructor('!include', YAMLLoader.include)
 
 
-def load_yaml_file(file_path: Path) \
-        -> Dict:
+def load_yaml_file(file_path: Path) -> Dict:
     """
     Reads and returns the contents of a YAML file.
-    Code after: https://github.com/audio-captioning/dcase-2020-baseline/blob/master/tools/file_io.py
 
     :param file_path: Path to the YAML file.
     :type file_path: pathlib.Path
@@ -47,3 +42,7 @@ def load_yaml_file(file_path: Path) \
     """
     with file_path.open('r') as f:
         return yaml.load(f, Loader=YAMLLoader)
+
+
+
+# EOF

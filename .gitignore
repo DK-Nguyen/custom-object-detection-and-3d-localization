@@ -9,3 +9,6 @@ venv/
 # Python Tools for IDEs
 __pycache__/
 *.pyc
+
+# Papers related to the project
+papers/
