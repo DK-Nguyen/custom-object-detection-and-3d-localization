@@ -1,7 +1,7 @@
 dataset:
     name: coco_like
     hard_negative_background_preparation:
-        option: Yes
+        option: No
         input_dir: datasets/hard_negatives
         output_dir: datasets/coco_like/backgrounds
         output_width: 512
@@ -9,6 +9,7 @@ dataset:
         output_type: png
     training_images_preparation:
         option: Yes
+        name: coco_tree_train
         input_dir: datasets/coco_like
         output_dir: datasets/coco_like/training
         num_images: 2000
@@ -23,7 +24,8 @@ dataset:
         license_name: free
         license_url: none
     validation_images_preparation:
-        option: Yes
+        option: No
+        name: coco_tree_val
         input_dir: datasets/coco_like
         output_dir: datasets/coco_like/validation
         num_images: 500

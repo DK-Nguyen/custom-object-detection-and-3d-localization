@@ -5,6 +5,7 @@ Process: preparing the dataset for training neural networks
 import logging
 from omegaconf import DictConfig
 from pathlib import Path
+from detectron2.data.datasets import register_coco_instances
 
 from .hard_negative import HardNegativeBackgroundPreparation
 from .image_composition import ImageComposition
@@ -42,6 +43,13 @@ def dataset_creation(cfg: DictConfig) -> None:
         image_comp_training.main()
         coco_json_creator_training = CocoJsonCreator(cfg.training_images_preparation)
         coco_json_creator_training.main()
+        log.info(f'Registering COCO Format dataset for {cfg.training_images_preparation.name}')
+        coco_instances_path = PROJECT_PATH / cfg.training_images_preparation.output_dir / 'coco_instances.json'
+        coco_image_dir = PROJECT_PATH / cfg.training_images_preparation.output_dir / 'images'
+        register_coco_instances(name=cfg.training_images_preparation.name,
+                                metadata={},
+                                json_file=coco_instances_path,
+                                image_root=coco_image_dir)
 
     if cfg.validation_images_preparation.option:
         log.info(f'Preparing validation images for {cfg.name} dataset')
@@ -51,4 +59,7 @@ def dataset_creation(cfg: DictConfig) -> None:
         coco_json_creator_val.main()
 
     log.info('--- Dataset creation done ---')
+
+
+
 

@@ -3,6 +3,7 @@ datasets/
 
 # Output folder
 outputs/
+saved_outputs/
 
 # User specific files
 .idea/
@@ -19,4 +20,4 @@ __pycache__/
 
 # Papers related to the project
 papers/
-
+docs/
