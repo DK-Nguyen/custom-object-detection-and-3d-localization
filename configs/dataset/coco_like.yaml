@@ -11,7 +11,7 @@ dataset:
         option: Yes
         input_dir: datasets/coco_like
         output_dir: datasets/coco_like/training
-        num_images: 10
+        num_images: 2000
         max_foregrounds: 15
         output_width: 512
         output_height: 512
@@ -26,7 +26,7 @@ dataset:
         option: Yes
         input_dir: datasets/coco_like
         output_dir: datasets/coco_like/validation
-        num_images: 2
+        num_images: 500
         max_foregrounds: 15
         output_width: 512
         output_height: 512

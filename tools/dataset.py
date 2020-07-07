@@ -17,12 +17,12 @@ log = logging.getLogger(__name__)
 
 def dataset_creation(cfg: DictConfig) -> None:
     """
-
+    Creating the dataset using configuration in cfg
     :param cfg: the configuration dictionary
     :type: logging.config.dictConfig
     :return:
     """
-    log.info('Dataset creation')
+    log.info('--- Dataset creation ---')
     hard_negative_input_dir = PROJECT_PATH / cfg.hard_negative_background_preparation.input_dir
     hard_negative_output_dir = PROJECT_PATH / cfg.hard_negative_background_preparation.output_dir
 
@@ -42,4 +42,13 @@ def dataset_creation(cfg: DictConfig) -> None:
         image_comp_training.main()
         coco_json_creator_training = CocoJsonCreator(cfg.training_images_preparation)
         coco_json_creator_training.main()
+
+    if cfg.validation_images_preparation.option:
+        log.info(f'Preparing validation images for {cfg.name} dataset')
+        image_comp_val = ImageComposition(cfg.validation_images_preparation)
+        image_comp_val.main()
+        coco_json_creator_val = CocoJsonCreator(cfg.validation_images_preparation)
+        coco_json_creator_val.main()
+
+    log.info('--- Dataset creation done ---')
 
