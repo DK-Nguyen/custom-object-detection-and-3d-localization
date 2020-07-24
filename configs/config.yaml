@@ -11,4 +11,5 @@ workflow:
   dnn_training: Yes
   dnn_testing: Yes
   reconstruct_3d: No
+  demo: No
 

@@ -16,8 +16,8 @@ class HardNegativeBackgroundPreparation:
     foregrounds to help the training process).
     """
     def __init__(self,
-                 input_dir: str,
-                 output_dir: str,
+                 input_dir: Path,
+                 output_dir: Path,
                  output_width: int = 512,
                  output_height: int = 512,
                  output_type: str = 'png'
@@ -35,8 +35,8 @@ class HardNegativeBackgroundPreparation:
         :type output_height: str (default: 512)
         """
         # log.info("Preparing true-negative images")
-        self.input_dir: Path = Path(input_dir)
-        self.output_dir: Path = Path(output_dir)
+        self.input_dir: Path = input_dir
+        self.output_dir: Path = output_dir
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.allowed_output_types: list = ['.png', '.jpg', '.jpeg']
         self.allowed_background_types: list = ['.png', '.jpg', '.jpeg']

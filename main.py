@@ -18,17 +18,17 @@ def main(cfg: DictConfig) -> None:
     # dataset creation
     if cfg.workflow.dataset_creation:
         dataset_creation(cfg.dataset)
-
     # training
     if cfg.workflow.dnn_training:
         pass
-
     # testing
     if cfg.workflow.dnn_testing:
         pass
-
     # 3d reconstruction
     if cfg.workflow.reconstruct_3d:
+        pass
+    # making demo
+    if cfg.workflow.demo:
         pass
 
 
