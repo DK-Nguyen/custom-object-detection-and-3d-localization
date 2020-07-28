@@ -1,15 +1,15 @@
 defaults:
-  - dataset: coco_like
-  - model: mask_rcnn
-  - dataset_model: ${defaults.0.dataset}_${defaults.1.model}
+  - dataset: coco_tree
+  - model: mask_rcnn_R_50_FPN_3x
     optional: true
+  - dataset_model: ${defaults.0.dataset}_${defaults.1.model}
   - hydra/job_logging: colorlog  # additional logging config
   - hydra/hydra_logging: colorlog  # additional logging config
 
 workflow:
-  dataset_creation: Yes
+  dataset_creation: No
   dnn_training: Yes
-  dnn_testing: Yes
+  dnn_testing: No
   reconstruct_3d: No
   demo: No
 

@@ -13,7 +13,7 @@ log = logging.getLogger(__name__)  # A logger for this file
 
 @hydra.main(config_path="configs/config.yaml")
 def main(cfg: DictConfig) -> None:
-    log.info(f'Configurations:\n {cfg.pretty()}')
+    log.info(f'Main configurations:\n{cfg.pretty()}')
 
     # dataset creation
     if cfg.workflow.dataset_creation:

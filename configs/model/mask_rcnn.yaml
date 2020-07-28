@@ -1,3 +1,0 @@
-model:
-  name: mask_rcnn
-  lr: !!float 1e-4

@@ -1,18 +1,25 @@
 """
-Process: preparing the dataset for training neural networks
+Process: preparing the dataset for the neural networks
 """
 
+from typing import List, Dict, Tuple, Optional
 import logging
-from omegaconf import DictConfig
 from pathlib import Path
+import random
+import cv2
+
+from omegaconf import DictConfig
 from detectron2.data.datasets import register_coco_instances
 from detectron2.data import MetadataCatalog, DatasetCatalog
+from detectron2.data.catalog import Metadata
+from detectron2.utils.visualizer import Visualizer
 
 from .hard_negative import HardNegativeBackgroundPreparation
 from .image_composition import ImageComposition
 from .coco_json_utils import CocoJsonCreator
 
-__all__ = ['dataset_creation', 'register_custom_coco_dataset']
+__all__ = ['dataset_creation', 'register_custom_coco_dataset',
+           'visualizing_coco_dataset']
 
 PROJECT_PATH = Path(__file__).parents[1]  # get directory 2 levels up
 log = logging.getLogger(__name__)  # A logger for this file
@@ -20,10 +27,11 @@ log = logging.getLogger(__name__)  # A logger for this file
 
 def dataset_creation(cfg: DictConfig) -> None:
     """
-    Creating the dataset using configurations in cfg.dataset
-    :param cfg: the configuration dictionary
-    :type: logging.config.dictConfig
-    :return:
+    Creating the dataset using configurations in cfg.dataset.
+
+    :param cfg: the configuration dictionary.
+    :type: logging.config.dictConfig.
+    :return: None
     """
     log.info('--- Dataset creation ---')
     hard_negative_input_dir: Path = PROJECT_PATH / cfg.hard_negative_background_preparation.input_dir
@@ -56,16 +64,51 @@ def dataset_creation(cfg: DictConfig) -> None:
     log.info('--- Dataset creation done ---')
 
 
-def register_custom_coco_dataset(cfg: DictConfig) -> None:
+def register_custom_coco_dataset(cfg: DictConfig) \
+        -> Tuple[List[Dict], Metadata]:
     """
+    Registering the custom dataset in COCO format to detectron2.
 
-    :param cfg: the configuration dictionary
-    :type cfg: logging.config.dictConfig
-    :return:
+    :param cfg: the configuration dictionary of dataset_model.
+    :type cfg: logging.config.dictConfig.
+    :return information about images and instances in
+             COCO format, together with its metadata.
+    :rtype dataset_dicts: List[Dict].
+           dataset_metadata: detectron2.data.catalog.Metadata.
     """
-    # log.info(f'Registering COCO Format dataset for {cfg.}')
+    log.info(f'Registering COCO Format dataset for {cfg.name}')
+    register_coco_instances(name=cfg.name,
+                            metadata={},
+                            json_file=PROJECT_PATH/Path(cfg.coco_instances),
+                            image_root=PROJECT_PATH/Path(cfg.coco_images))
+    dataset_dicts = DatasetCatalog.get(cfg.name)
+    dataset_metadata = MetadataCatalog.get(cfg.name)
 
-    # print(cfg.)
-    # register_coco_instances("fruits_nuts", {}, "./data/trainval.json", "./data/images")
-    pass
+    return dataset_dicts, dataset_metadata
 
+
+def visualizing_coco_dataset(dataset_dicts: List[Dict],
+                             dataset_metadata: Metadata,
+                             num_ims: Optional[int] = 3) \
+        -> None:
+    """
+    Visualizing a dataset in COCO format.
+
+    :param dataset_dicts: information about images and instances.
+    :type dataset_dicts: List[Dict].
+    :param dataset_metadata: contains additional information of the dataset_dicts.
+    :type dataset_metadata: detectron2.data.catalog.Metadata.
+    :param num_ims: number of images to visualize
+    :type num_ims: int (optional, default values: 3)
+    :return: None
+    """
+    for d in random.sample(dataset_dicts, num_ims):
+        img = cv2.imread(d["file_name"])
+        visualizer = Visualizer(img[:, :, ::-1],
+                                metadata=dataset_metadata,
+                                scale=1)
+        vis = visualizer.draw_dataset_dict(d)
+        v = vis.get_image()[:, :, ::-1]
+        cv2.imshow('', v)
+        cv2.waitKey()
+    cv2.destroyAllWindows()
