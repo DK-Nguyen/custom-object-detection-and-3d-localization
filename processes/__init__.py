@@ -1,3 +1,4 @@
 """"""
+from .train import train
 
 

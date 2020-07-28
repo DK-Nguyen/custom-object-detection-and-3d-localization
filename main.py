@@ -4,11 +4,11 @@ from omegaconf import DictConfig
 import logging
 
 from tools import dataset_creation
+from processes import train
 
 __all__ = ['main']
 
-# A logger for this file
-log = logging.getLogger(__name__)
+log = logging.getLogger(__name__)  # A logger for this file
 
 
 @hydra.main(config_path="configs/config.yaml")
@@ -20,7 +20,7 @@ def main(cfg: DictConfig) -> None:
         dataset_creation(cfg.dataset)
     # training
     if cfg.workflow.dnn_training:
-        pass
+        train(cfg.dataset_model)
     # testing
     if cfg.workflow.dnn_testing:
         pass

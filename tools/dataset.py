@@ -20,7 +20,7 @@ log = logging.getLogger(__name__)  # A logger for this file
 
 def dataset_creation(cfg: DictConfig) -> None:
     """
-    Creating the dataset using configuration in cfg
+    Creating the dataset using configurations in cfg.dataset
     :param cfg: the configuration dictionary
     :type: logging.config.dictConfig
     :return:
@@ -57,6 +57,14 @@ def dataset_creation(cfg: DictConfig) -> None:
 
 
 def register_custom_coco_dataset(cfg: DictConfig) -> None:
+    """
+
+    :param cfg: the configuration dictionary
+    :type cfg: logging.config.dictConfig
+    :return:
+    """
+    # log.info(f'Registering COCO Format dataset for {cfg.}')
+
     # print(cfg.)
     # register_coco_instances("fruits_nuts", {}, "./data/trainval.json", "./data/images")
     pass
