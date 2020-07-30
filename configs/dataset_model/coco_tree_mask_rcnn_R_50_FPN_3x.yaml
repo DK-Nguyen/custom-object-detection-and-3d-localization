@@ -4,3 +4,9 @@ dataset_model:
   coco_images: datasets/coco_tree/training/images
   model:
     config_url: COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml
+    num_workers: 2
+    ims_per_batch: 2
+    lr: !!float 0.00025
+    max_iter: 30
+    batch_size_per_im: 128
+    num_classes: 1  # only 1 class (tree)

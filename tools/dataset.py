@@ -18,7 +18,8 @@ from .hard_negative import HardNegativeBackgroundPreparation
 from .image_composition import ImageComposition
 from .coco_json_utils import CocoJsonCreator
 
-__all__ = ['dataset_creation', 'register_custom_coco_dataset',
+__all__ = ['dataset_creation',
+           'register_custom_coco_dataset',
            'visualizing_coco_dataset']
 
 PROJECT_PATH = Path(__file__).parents[1]  # get directory 2 levels up
@@ -30,7 +31,7 @@ def dataset_creation(cfg: DictConfig) -> None:
     Creating the dataset using configurations in cfg.dataset.
 
     :param cfg: the configuration dictionary.
-    :type: logging.config.dictConfig.
+    :type cfg: omegaconf.dictconfig.DictConfig
     :return: None
     """
     log.info('--- Dataset creation ---')
@@ -70,7 +71,7 @@ def register_custom_coco_dataset(cfg: DictConfig) \
     Registering the custom dataset in COCO format to detectron2.
 
     :param cfg: the configuration dictionary of dataset_model.
-    :type cfg: logging.config.dictConfig.
+    :type cfg: omegaconf.dictconfig.DictConfig.
     :return information about images and instances in
              COCO format, together with its metadata.
     :rtype dataset_dicts: List[Dict].

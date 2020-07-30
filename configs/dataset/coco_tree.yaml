@@ -1,14 +1,14 @@
 dataset:
     name: coco_tree
     hard_negative_background_preparation:
-        option: Yes
+        option: No
         input_dir: datasets/hard_negatives
         output_dir: datasets/coco_tree/backgrounds
         output_width: 512
         output_height: 512
         output_type: png
     training_images_preparation:
-        option: Yes
+        option: No
         name: coco_tree_train
         input_dir: datasets/coco_tree
         output_dir: datasets/coco_tree/training

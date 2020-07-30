@@ -12,6 +12,7 @@ from detectron2 import model_zoo
 from detectron2.config import get_cfg
 from detectron2.config.config import CfgNode
 
+from .test import test
 from tools import register_custom_coco_dataset, visualizing_coco_dataset
 
 __all__ = ['train']
@@ -20,52 +21,55 @@ PROJECT_PATH = Path(__file__).parents[1]  # get directory 2 levels up
 log = logging.getLogger(__name__)  # A logger for this file
 
 
-def _get_pretrained_model(cfg: DictConfig) -> None:
+def _get_pretrained_model(cfg: DictConfig) -> DefaultTrainer:
     """
 
-
-    :param cfg:
-    :return:
+    :param cfg: the dataset_model configuration
+    :type cfg: omegaconf.dictconfig.DictConfig.
+    :return trainer: A detectron's trainer with default training logic.
+    :rtype trainer:
     """
     log.info(cfg.model.config_url)
+
+    # Setting the hyper-parameters for the model
     model_cfg: CfgNode = get_cfg()
-    print(model_cfg)
-    model_cfg.merge_from_file(
-        model_zoo.get_config_file(cfg.model.config_url))
-    print(model_cfg)
+    model_cfg.merge_from_file(model_zoo.get_config_file(cfg.model.config_url))
+    model_cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(cfg.model.config_url)
+    model_cfg.DATASETS.TRAIN = (cfg.name, )
+    model_cfg.DATASETS.TEST = ()  # no metrics implemented yet for this dataset
+    model_cfg.DATALOADER.NUM_WORKERS = cfg.model.num_workers
+    model_cfg.SOLVER.IMS_PER_BATCH = cfg.model.ims_per_batch
+    model_cfg.SOLVER.BASE_LR = cfg.model.lr
+    model_cfg.SOLVER.MAX_ITER = cfg.model.max_iter
+    model_cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = cfg.model.batch_size_per_im
+    model_cfg.MODEL.ROI_HEADS.NUM_CLASSES = cfg.model.num_classes
+    model_cfg.OUTPUT_DIR = os.getcwd()  # using hydra, this will be the dir outputs/day/time
+
+    trainer: DefaultTrainer = DefaultTrainer(model_cfg)
+    trainer.resume_or_load(resume=False)
+
+    return trainer
 
 
-def train(cfg: DictConfig):
+def train(cfg: DictConfig) -> None:
     """
     Transfer learning using pretrained models from detectron2 model zoo.
 
     :param cfg: the configuration dictionary of dataset_model.
-    :type cfg: logging.config.dictConfig.
-    :return:
+    :type cfg: omegaconf.dictconfig.DictConfig.
+    :return: None
     """
+
+    log.info('--- Start Training ---')
     dataset_dicts, dataset_metadata = register_custom_coco_dataset(cfg)
     visualizing_coco_dataset(dataset_dicts=dataset_dicts,
                              dataset_metadata=dataset_metadata,
                              num_ims=3)
-    _get_pretrained_model(cfg)
+    # trainer: DefaultTrainer = _get_pretrained_model(cfg)
+    # trainer.train()
+    log.info('--- Training Done---')
 
+    log.info('--- Start Testing ---')
+    test(cfg)
 
-# if __name__ == '__main__':
-#     dataset_cfg = get_cfg()
-#     dataset_cfg.merge_from_file(model_zoo.get_config_file("COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml"))
-#     dataset_cfg.DATASETS.TRAIN = ("balloon_train",)
-#     dataset_cfg.DATASETS.TEST = ()
-#     dataset_cfg.DATALOADER.NUM_WORKERS = 2
-#     dataset_cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(
-#     "COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml")  # Let training initialize from model zoo
-#     dataset_cfg.SOLVER.IMS_PER_BATCH = 2
-#     dataset_cfg.SOLVER.BASE_LR = 0.00025  # pick a good LR
-#     dataset_cfg.SOLVER.MAX_ITER = 300  # 300 iterations seems good enough for this toy dataset; you may need to train longer for a practical dataset
-#     dataset_cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 128  # faster, and good enough for this toy dataset (default: 512)
-#     dataset_cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1  # only has one class (ballon)
-#
-#     os.makedirs(dataset_cfg.OUTPUT_DIR, exist_ok=True)
-#     trainer = DefaultTrainer(dataset_cfg)
-#     trainer.resume_or_load(resume=False)
-    # trainer.train(
 

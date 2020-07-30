@@ -13,7 +13,7 @@ log = logging.getLogger(__name__)  # A logger for this file
 
 @hydra.main(config_path="configs/config.yaml")
 def main(cfg: DictConfig) -> None:
-    log.info(f'Main configurations:\n{cfg.pretty()}')
+    # log.info(f'Main configurations:\n{cfg.pretty()}')
 
     # dataset creation
     if cfg.workflow.dataset_creation:
@@ -24,6 +24,7 @@ def main(cfg: DictConfig) -> None:
     # testing
     if cfg.workflow.dnn_testing:
         pass
+        # test(cfg.dataset_model)
     # 3d reconstruction
     if cfg.workflow.reconstruct_3d:
         pass
