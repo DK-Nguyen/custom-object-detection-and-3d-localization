@@ -88,6 +88,7 @@ def register_custom_coco_dataset(cfg: DictConfig) \
     return dataset_dicts, dataset_metadata
 
 
+# noinspection PyUnresolvedReferences
 def visualizing_coco_dataset(dataset_dicts: List[Dict],
                              dataset_metadata: Metadata,
                              num_ims: Optional[int] = 3) \

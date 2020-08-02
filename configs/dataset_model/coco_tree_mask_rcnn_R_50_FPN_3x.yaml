@@ -2,11 +2,12 @@ dataset_model:
   name: coco_tree_mask_rcnn_R_50_FPN_3x
   coco_instances: datasets/coco_tree/training/coco_instances.json
   coco_images: datasets/coco_tree/training/images
+  show_training_images: 0  # 0: don't show. change to an int to show
   model:
     config_url: COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml
     num_workers: 2
     ims_per_batch: 2
     lr: !!float 0.00025
-    max_iter: 30
-    batch_size_per_im: 128
+    max_iter: 3000
+    batch_size_per_im: 512
     num_classes: 1  # only 1 class (tree)

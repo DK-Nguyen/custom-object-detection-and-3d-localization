@@ -21,8 +21,9 @@ PROJECT_PATH = Path(__file__).parents[1]  # get directory 2 levels up
 log = logging.getLogger(__name__)  # A logger for this file
 
 
-def _get_pretrained_model(cfg: DictConfig) -> DefaultTrainer:
+def _get_model_configs(cfg: DictConfig) -> CfgNode:
     """
+    Get the configurations for a model specified in a .yaml file
 
     :param cfg: the dataset_model configuration
     :type cfg: omegaconf.dictconfig.DictConfig.
@@ -43,12 +44,9 @@ def _get_pretrained_model(cfg: DictConfig) -> DefaultTrainer:
     model_cfg.SOLVER.MAX_ITER = cfg.model.max_iter
     model_cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = cfg.model.batch_size_per_im
     model_cfg.MODEL.ROI_HEADS.NUM_CLASSES = cfg.model.num_classes
-    model_cfg.OUTPUT_DIR = os.getcwd()  # using hydra, this will be the dir outputs/day/time
+    model_cfg.OUTPUT_DIR = os.getcwd()  # using hydra, this will be the dir outputs/date/time
 
-    trainer: DefaultTrainer = DefaultTrainer(model_cfg)
-    trainer.resume_or_load(resume=False)
-
-    return trainer
+    return model_cfg
 
 
 def train(cfg: DictConfig) -> None:
@@ -64,12 +62,8 @@ def train(cfg: DictConfig) -> None:
     dataset_dicts, dataset_metadata = register_custom_coco_dataset(cfg)
     visualizing_coco_dataset(dataset_dicts=dataset_dicts,
                              dataset_metadata=dataset_metadata,
-                             num_ims=3)
-    # trainer: DefaultTrainer = _get_pretrained_model(cfg)
-    # trainer.train()
+                             num_ims=cfg.show_training_images)
+    model_configs: CfgNode = _get_model_configs(cfg)
+    trainer: DefaultTrainer = DefaultTrainer(model_configs)
+    trainer.train()
     log.info('--- Training Done---')
-
-    log.info('--- Start Testing ---')
-    test(cfg)
-
-

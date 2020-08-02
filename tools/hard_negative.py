@@ -92,5 +92,6 @@ class HardNegativeBackgroundPreparation:
                 bg_im.convert('RGB').save(output_path)
                 im_counter += 1
 
-        log.info(f'Done preparing {im_counter} hard negative background images')
+        log.info(f'Done preparing {im_counter} hard negative background images, '
+                 f'output directory: {self.output_dir}')
 

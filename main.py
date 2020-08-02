@@ -4,7 +4,7 @@ from omegaconf import DictConfig
 import logging
 
 from tools import dataset_creation
-from processes import train
+from processes import train, test
 
 __all__ = ['main']
 
@@ -23,8 +23,7 @@ def main(cfg: DictConfig) -> None:
         train(cfg.dataset_model)
     # testing
     if cfg.workflow.dnn_testing:
-        pass
-        # test(cfg.dataset_model)
+        test(cfg.dataset_model)
     # 3d reconstruction
     if cfg.workflow.reconstruct_3d:
         pass

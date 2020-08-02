@@ -15,4 +15,4 @@ def test(cfg: DictConfig):
     :param cfg:
     :return:
     """
-    log.info('Testing')
+    log.info('--- Testing ---')
