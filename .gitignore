@@ -1,9 +1,15 @@
 # Dataset folder
-datasets/
+datasets/*
+!datasets/.gitkeep
 
 # Output folder
-outputs/
+outputs/*
+!outputs/.gitkeep
 saved_outputs/
+
+# Weights folder
+weights/*
+!weights/.gitkeep
 
 # User specific files
 .idea/

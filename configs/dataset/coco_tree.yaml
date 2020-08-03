@@ -23,19 +23,3 @@ dataset:
         contributor: DK
         license_name: free
         license_url: none
-    validation_images_preparation:
-        option: No
-        name: coco_tree_val
-        input_dir: datasets/coco_tree
-        output_dir: datasets/coco_tree/validation
-        num_images: 500
-        max_foregrounds: 15
-        output_width: 512
-        output_height: 512
-        output_type: png
-        description: synthesized tree dataset (validation)
-        url: none
-        version: val_1.0
-        contributor: DK
-        license_name: free
-        license_url: none
