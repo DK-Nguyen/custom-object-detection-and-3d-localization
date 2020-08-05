@@ -95,10 +95,13 @@ def register_custom_coco_dataset(cfg: DictConfig,
         train_dataset: str = cfg.name+"_train"
         train_images_dir: Path = PROJECT_PATH/cfg.train.train_dataset_dir/'images'
         train_coco_instances_json: str = str(PROJECT_PATH/cfg.train.train_dataset_dir/'coco_instances.json')
-        register_coco_instances(name=train_dataset,
-                                metadata={},
-                                json_file=train_coco_instances_json,
-                                image_root=train_images_dir)
+        try:
+            register_coco_instances(name=train_dataset,
+                                    metadata={},
+                                    json_file=train_coco_instances_json,
+                                    image_root=train_images_dir)
+        except AssertionError:  # if the dataset is already registered
+            pass
         if process == 'train':
             log.info(f'Registering COCO Format datasets for {train_dataset}')
             dataset_dicts = DatasetCatalog.get(train_dataset)

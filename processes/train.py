@@ -32,7 +32,7 @@ def train(cfg: DictConfig) -> None:
                                                                                process='train')
     visualizing_coco_dataset(dataset_dicts=train_dataset_dicts,
                              dataset_metadata=train_dataset_metadata,
-                             num_ims=cfg.show_images)
+                             num_ims=cfg.train.show_images)
     model_cfg: CfgNode = get_model_configs(cfg)
     trainer: DefaultTrainer = DefaultTrainer(model_cfg)
     trainer.train()

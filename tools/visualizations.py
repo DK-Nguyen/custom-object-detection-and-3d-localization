@@ -42,7 +42,8 @@ def visualizing_coco_dataset(dataset_dicts: List[Dict],
 def visualizing_predicted_samples(img: ndarray,
                                   metadata: Metadata,
                                   predicted_samples: Dict,
-                                  path_to_save: str = None)\
+                                  path_to_save: str = None,
+                                  show_image: bool = True)\
         -> None:
     """
     Visualizing the predicted samples from detectron2's based models
@@ -55,6 +56,8 @@ def visualizing_predicted_samples(img: ndarray,
     :type detectron2.data.catalog.Metadata
     :param path_to_save: if value is not None, then save the image to the path
     :type path_to_save: str
+    :param show_image: if True, then show the images, otherwise do not.
+    :type show_image: bool, default value: True
     :return: None
     """
     visualizer: Visualizer = Visualizer(img[:, :, ::-1],
@@ -63,8 +66,9 @@ def visualizing_predicted_samples(img: ndarray,
                                         instance_mode=ColorMode.IMAGE_BW)
     out: VisImage = visualizer.draw_instance_predictions(predicted_samples["instances"].to("cpu"))
     v: ndarray = out.get_image()[:, :, ::-1]
-    cv2.imshow('', v)
     if path_to_save is not None:
         cv2.imwrite(path_to_save, v)
-    cv2.waitKey()
-    cv2.destroyAllWindows()
+    if show_image:
+        cv2.imshow('', v)
+        cv2.waitKey()
+        cv2.destroyAllWindows()
