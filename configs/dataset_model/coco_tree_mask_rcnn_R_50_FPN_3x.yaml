@@ -5,14 +5,15 @@ dataset_model:
     train_dataset_dir: datasets/coco_tree/training_subset
     show_images: 0  # 0: don't show, change to an int as the number of images to show
   validation:
-    option: No
-    val_dataset_dir:
-  test:
     option: Yes
+    val_dataset_dir: datasets/coco_tree/validation
+    show_images: -1  # 0: don't show, -1: show all, an int: number of ims to show
+  test:
+    option: No
     test_dataset_dir: datasets/coco_tree/testing
     use_pretrained_weight: No
     pretrained_weight:
-    threshold: 0.5
+    threshold: 0.8
     testing_device: cuda  # use cpu or cuda
     saving_predicted_ims: Yes
     show_predicted_ims: No

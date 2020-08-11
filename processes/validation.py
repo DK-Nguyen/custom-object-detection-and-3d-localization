@@ -1,10 +1,12 @@
 """
 Train  neural networks the the synthesized dataset
 """
-
+import os
 from pathlib import Path
 from omegaconf import DictConfig
 import logging
+
+from tools import register_custom_coco_dataset, visualizing_coco_dataset
 
 __all__ = ['validation']
 
@@ -22,7 +24,11 @@ def validation(cfg: DictConfig) -> None:
     """
 
     log.info('--- Start Validation ---')
-
+    val_dataset_dicts, val_dataset_metadata = register_custom_coco_dataset(cfg=cfg,
+                                                                           process='val')
+    visualizing_coco_dataset(dataset_dicts=val_dataset_dicts,
+                             dataset_metadata=val_dataset_metadata,
+                             num_ims=cfg.validation.show_images)
     log.info('--- Validation Done ---')
 
 

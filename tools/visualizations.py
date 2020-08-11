@@ -14,20 +14,22 @@ __all__ = ['visualizing_coco_dataset', 'visualizing_predicted_samples']
 
 def visualizing_coco_dataset(dataset_dicts: List[Dict],
                              dataset_metadata: Metadata,
-                             num_ims: Optional[int] = 3)\
+                             num_ims: Optional[int] = 0)\
         -> None:
     """
-    Visualizing a dataset in COCO format.
+    Visualizing a dataset in COCO format, used after registering a coco dataset using
+    detectron2.data.datasets.register_coco_instances.
 
     :param dataset_dicts: information about images and instances.
     :type dataset_dicts: List[Dict].
     :param dataset_metadata: contains additional information of the dataset_dicts.
     :type dataset_metadata: detectron2.data.catalog.Metadata.
     :param num_ims: number of images to visualize
-    :type num_ims: int (optional, default values: 3)
+    :type num_ims: int (optional, default values: 0. if value is -1, then show all images)
     :return: None
     """
-    for d in random.sample(dataset_dicts, num_ims):
+    ims_to_show: int = len(dataset_dicts) if num_ims == -1 else num_ims
+    for d in random.sample(dataset_dicts, ims_to_show):
         img: ndarray = cv2.imread(d["file_name"])
         visualizer: Visualizer = Visualizer(img[:, :, ::-1],
                                             metadata=dataset_metadata,
