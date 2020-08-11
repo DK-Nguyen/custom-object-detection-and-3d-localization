@@ -28,4 +28,4 @@ dataset:
         labelme_annotating: Yes
         val_images_dir: datasets/coco_tree/validation/images
         labelme_annotation_dir: datasets/coco_tree/validation/annotations
-        coco_json_path: datasets/coco_tree/validation/val_coco_instances2.json
+        coco_json_path: datasets/coco_tree/validation/coco_instances.json

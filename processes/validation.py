@@ -29,6 +29,7 @@ def validation(cfg: DictConfig) -> None:
     visualizing_coco_dataset(dataset_dicts=val_dataset_dicts,
                              dataset_metadata=val_dataset_metadata,
                              num_ims=cfg.validation.show_images)
+
     log.info('--- Validation Done ---')
 
 

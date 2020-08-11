@@ -8,7 +8,7 @@ from processes import train, test, validation
 
 __all__ = ['main']
 
-log = logging.getLogger(__name__)  # A logger for this file
+log: logging.Logger = logging.getLogger(__name__)  # A logger for this file
 
 
 @hydra.main(config_path="configs/config.yaml")
@@ -31,6 +31,8 @@ def main(cfg: DictConfig) -> None:
 
     if cfg.workflow.demo:
         pass
+
+    log.info(f'--- Exit program ---')
 
 
 if __name__ == '__main__':

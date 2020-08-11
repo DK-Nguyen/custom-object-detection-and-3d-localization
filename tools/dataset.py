@@ -6,9 +6,8 @@ import logging
 import os
 from pathlib import Path
 import json
-# from labelme import utils
 import numpy as np
-import PIL.Image
+from PIL import ImageDraw, Image
 
 from omegaconf import DictConfig
 from detectron2.data.datasets import register_coco_instances
@@ -180,16 +179,13 @@ class _Labelme2coco(object):
 
     def image(self, data, num):
         image = {}
-        img = utils.img_b64_to_arr(data["imageData"])
-        height, width = img.shape[:2]
-        img = None
-        image["height"] = height
-        image["width"] = width
+        image["height"] = data["imageHeight"]
+        image["width"] = data["imageWidth"]
         image["id"] = num
         image["file_name"] = data["imagePath"].split("/")[-1]
 
-        self.height = height
-        self.width = width
+        self.height = data["imageHeight"]
+        self.width = data["imageWidth"]
 
         return image
 
@@ -250,9 +246,9 @@ class _Labelme2coco(object):
 
     def polygons_to_mask(self, img_shape, polygons):
         mask = np.zeros(img_shape, dtype=np.uint8)
-        mask = PIL.Image.fromarray(mask)
+        mask = Image.fromarray(mask)
         xy = list(map(tuple, polygons))
-        PIL.ImageDraw.Draw(mask).polygon(xy=xy, outline=1, fill=1)
+        ImageDraw.Draw(mask).polygon(xy=xy, outline=1, fill=1)
         mask = np.array(mask, dtype=bool)
         return mask
 
