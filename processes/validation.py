@@ -1,12 +1,18 @@
 """
-Train  neural networks the the synthesized dataset
+
 """
 import os
 from pathlib import Path
 from omegaconf import DictConfig
 import logging
 
-from tools import register_custom_coco_dataset, visualizing_coco_dataset
+from detectron2.evaluation import COCOEvaluator, inference_on_dataset
+from detectron2.data import build_detection_test_loader
+from detectron2.config.config import CfgNode
+from detectron2.engine import DefaultTrainer
+
+from tools import register_custom_coco_dataset, visualizing_coco_dataset, \
+    get_model_configs
 
 __all__ = ['validation']
 
@@ -23,13 +29,25 @@ def validation(cfg: DictConfig) -> None:
     :return: None
     """
 
-    log.info('--- Start Validation ---')
+    log.info('--- Start Validation using pretrained weight ---')
+    _, _ = register_custom_coco_dataset(cfg=cfg,
+                                        process='train')
     val_dataset_dicts, val_dataset_metadata = register_custom_coco_dataset(cfg=cfg,
                                                                            process='val')
     visualizing_coco_dataset(dataset_dicts=val_dataset_dicts,
                              dataset_metadata=val_dataset_metadata,
                              num_ims=cfg.validation.show_images)
 
+    model_cfg: CfgNode = get_model_configs(cfg=cfg, process='val')
+    evaluator = COCOEvaluator(dataset_name=cfg.name+'_val',
+                              cfg=model_cfg,
+                              distributed=False,
+                              output_dir=os.getcwd())
+    val_loader = build_detection_test_loader(cfg=model_cfg,
+                                             dataset_name=cfg.name+'_val')
+    trainer: DefaultTrainer = DefaultTrainer(model_cfg)
+    trainer.resume_or_load(resume=True)
+    inference_on_dataset(model=trainer.model,
+                         data_loader=val_loader,
+                         evaluator=evaluator)
     log.info('--- Validation Done ---')
-
-

@@ -39,9 +39,11 @@ def get_model_configs(cfg: DictConfig,
 
     if process == 'train':
         model_cfg.DATASETS.TRAIN = (cfg.name + '_train', )
-        model_cfg.DATASETS.TEST = ()
-    elif process == 'val':
-        model_cfg.DATASETS.TEST = (cfg.name + '_val', )
+        model_cfg.DATASETS.TEST = (cfg.name + '_val', ) if cfg.validation.option else ()
+    # elif process == 'val':
+    #     model_cfg.DATASETS.TRAIN = (cfg.name + '_train', )
+    #     model_cfg.DATASETS.TEST = (cfg.name + '_val', )
+    #     model_cfg.MODEL.WEIGHTS = str(PROJECT_PATH / cfg.validation.pretrained_weight)
     elif process == 'test':
         if cfg.test.use_pretrained_weight:
             if cfg.test.pretrained_weight is None:

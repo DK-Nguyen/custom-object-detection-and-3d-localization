@@ -67,11 +67,13 @@ def dataset_creation(cfg: DictConfig) -> None:
             pass
             os.system(f'labelme {val_images_dir} --output {labelme_annotation_dir} '
                       f'--nodata --autosave --logger-level debug')
-        log.info(f'Converting labelme annotations from {labelme_annotation_dir} '
-                     f'to COCO data format in JSON.')
-        labelme_json_paths: List = list(labelme_annotation_dir.glob('*.json'))
-        _Labelme2coco(labelme_json=labelme_json_paths,
-                      save_json_path=str(PROJECT_PATH / val_cfg.coco_json_path))
+        if val_cfg.converting_labelme_to_coco:
+            coco_json_path: str = str(PROJECT_PATH / val_cfg.coco_json_path)
+            log.info(f'Converting labelme annotations from {labelme_annotation_dir} \n'
+                     f'to COCO data format in JSON, output to file {coco_json_path}.')
+            labelme_json_paths: List = list(labelme_annotation_dir.glob('*.json'))
+            _Labelme2coco(labelme_json=labelme_json_paths,
+                          save_json_path=coco_json_path)
 
     log.info('--- Dataset creation done ---')
 
@@ -84,13 +86,15 @@ def register_custom_coco_dataset(cfg: DictConfig,
 
     :param cfg: the configuration dictionary of dataset_model.
     :type cfg: omegaconf.dictconfig.DictConfig.
-    :param process: value should be 'train' or 'val'
+    :param process: value should be 'train', 'val', or 'test'
     :type process: str
     :return information about images and instances in
              COCO format, together with its metadata.
     :rtype dataset_dicts: List[Dict].
            dataset_metadata: detectron2.data.catalog.Metadata.
     """
+    if process not in ['train', 'test', 'val']:
+        raise Exception(f"process is {process}, but it must be either 'train', 'test', or 'val'")
     dataset_dicts: List[Dict] = [{}]
     dataset_metadata: Metadata = Metadata()
 
