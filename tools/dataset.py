@@ -98,36 +98,35 @@ def register_custom_coco_dataset(cfg: DictConfig,
     dataset_dicts: List[Dict] = [{}]
     dataset_metadata: Metadata = Metadata()
 
-    if process == 'val':
+    train_dataset: str = cfg.name + "_train"
+    train_images_dir: Path = PROJECT_PATH / cfg.train.train_dataset_dir / 'images'
+    train_coco_instances_json: str = str(PROJECT_PATH / cfg.train.train_dataset_dir / 'coco_instances.json')
+    try:
+        log.info(f'Registering {train_dataset} as a COCO-format dataset')
+        register_coco_instances(name=train_dataset,
+                                metadata={},
+                                json_file=train_coco_instances_json,
+                                image_root=train_images_dir)
+    except AssertionError:  # if the dataset is already registered, do nothing
+        pass
+
+    if process == 'train':
+        dataset_dicts = DatasetCatalog.get(train_dataset)
+        dataset_metadata = MetadataCatalog.get(train_dataset)
+    elif process == 'test':
+        log.info(f'Getting metadata for testing on {cfg.name}')
+        dataset_metadata = MetadataCatalog.get(train_dataset)
+    elif process == 'val':
         val_dataset: str = cfg.name+"_val"
-        log.info(f'Registering {val_dataset} as a COCO-format dataset')
         val_images_dir: Path = PROJECT_PATH/cfg.validation.val_dataset_dir/'images'
         val_coco_instances_json: str = str(PROJECT_PATH/cfg.validation.val_dataset_dir/'coco_instances.json')
+        log.info(f'Registering {val_dataset} as a COCO-format dataset')
         register_coco_instances(name=val_dataset,
                                 metadata={},
                                 json_file=val_coco_instances_json,
                                 image_root=val_images_dir)
         dataset_dicts = DatasetCatalog.get(val_dataset)
         dataset_metadata = MetadataCatalog.get(val_dataset)
-
-    elif process == 'train' or process == 'test':
-        train_dataset: str = cfg.name+"_train"
-        train_images_dir: Path = PROJECT_PATH/cfg.train.train_dataset_dir/'images'
-        train_coco_instances_json: str = str(PROJECT_PATH/cfg.train.train_dataset_dir/'coco_instances.json')
-        try:
-            register_coco_instances(name=train_dataset,
-                                    metadata={},
-                                    json_file=train_coco_instances_json,
-                                    image_root=train_images_dir)
-        except AssertionError:  # if the dataset is already registered, do nothing
-            pass
-        if process == 'train':
-            log.info(f'Registering {train_dataset} as a COCO-format dataset')
-            dataset_dicts = DatasetCatalog.get(train_dataset)
-            dataset_metadata = MetadataCatalog.get(train_dataset)
-        elif process == 'test':
-            log.info(f'Getting metadata for testing on {cfg.name}')
-            dataset_metadata = MetadataCatalog.get(train_dataset)
 
     return dataset_dicts, dataset_metadata
 

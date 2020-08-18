@@ -22,8 +22,8 @@ def main(cfg: DictConfig) -> None:
     if cfg.workflow.dnn_method:
         if cfg.dataset_model.train.option:
             train(cfg.dataset_model)
-        # if cfg.dataset_model.validation.option:
-        #     validation(cfg.dataset_model)
+        if cfg.dataset_model.validation.option:
+            validation(cfg.dataset_model)
         if cfg.dataset_model.test.option:
             test(cfg.dataset_model)
 

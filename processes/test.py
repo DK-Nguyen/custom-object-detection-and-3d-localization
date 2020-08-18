@@ -22,21 +22,21 @@ log = logging.getLogger(__name__)  # A logger for this file
 
 def test(cfg: DictConfig):
     """
-
+    Running inference on an unseen dataset.
     :param cfg: the configuration dictionary of dataset_model.
     :return:
     """
     log.info(f'--- Start Testing ---')
-    _, coco_tree_metadata = register_custom_coco_dataset(cfg=cfg,
-                                                         process='test')
-    output_dir: Path = Path(os.getcwd())/'predicted_ims'  # using hydra, this will be PROJECT_PATH/outputs/date/time
-    output_dir.mkdir(parents=False, exist_ok=True)
-    log.info(f'Predicted images are saved to {output_dir}')
-
     if cfg.train.option and cfg.test.use_pretrained_weight:
         raise Exception('cfg.train.option is Yes, but cfg.test.use_pretrained_weight is also Yes')
     elif not cfg.train.option and not cfg.test.use_pretrained_weight:
         raise Exception('cfg.train.option is No but cfg.test.use_pretrained_weight is also No')
+
+    _, coco_tree_metadata = register_custom_coco_dataset(cfg=cfg,
+                                                         process='test')
+    output_dir: Path = Path(os.getcwd()) / 'predicted_ims'  # using hydra, this will be PROJECT_PATH/outputs/date/time
+    output_dir.mkdir(parents=False, exist_ok=True)
+    log.info(f'Predicted images are saved to {output_dir}')
 
     model_cfg: CfgNode = get_model_configs(cfg=cfg, process='test')
     predictor: DefaultPredictor = DefaultPredictor(model_cfg)

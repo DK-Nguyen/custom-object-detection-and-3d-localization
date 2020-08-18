@@ -39,21 +39,30 @@ def get_model_configs(cfg: DictConfig,
 
     if process == 'train':
         model_cfg.DATASETS.TRAIN = (cfg.name + '_train', )
-        model_cfg.DATASETS.TEST = (cfg.name + '_val', ) if cfg.validation.option else ()
-    # elif process == 'val':
-    #     model_cfg.DATASETS.TRAIN = (cfg.name + '_train', )
-    #     model_cfg.DATASETS.TEST = (cfg.name + '_val', )
-    #     model_cfg.MODEL.WEIGHTS = str(PROJECT_PATH / cfg.validation.pretrained_weight)
+        model_cfg.DATASETS.TEST = ()
+    elif process == 'val':
+        model_cfg.DATASETS.TRAIN = (cfg.name + '_train', )
+        model_cfg.DATASETS.TEST = (cfg.name + '_val', )
+        if cfg.validation.use_pretrained_weight:
+            if cfg.validation.pretrained_weight is None:
+                raise Exception('cfg.validation.use_pretrained_weight is Yes, however, '
+                                'cfg.validation.pretrained_weight is not provided')
+            log.info(f'Loading pretrained model from {PROJECT_PATH / cfg.validation.pretrained_weight}')
+            model_cfg.MODEL.WEIGHTS = str(PROJECT_PATH / cfg.validation.pretrained_weight)
+        else:
+            weight_path = os.path.join(model_cfg.OUTPUT_DIR, "model_final.pth")
+            log.info(f'Loading trained model from {PROJECT_PATH / weight_path}')
+            model_cfg.MODEL.WEIGHTS = weight_path
     elif process == 'test':
         if cfg.test.use_pretrained_weight:
             if cfg.test.pretrained_weight is None:
                 raise Exception('cfg.test.use_pretrained_weight is Yes, '
                                 'but cfg.test.pretrained_weight is not provided')
-            log.info(f'Loading pretrained weight from {PROJECT_PATH / cfg.test.pretrained_weight}')
+            log.info(f'Loading pretrained model from {PROJECT_PATH / cfg.test.pretrained_weight}')
             model_cfg.MODEL.WEIGHTS = str(PROJECT_PATH / cfg.test.pretrained_weight)
         else:
             weight_path = os.path.join(model_cfg.OUTPUT_DIR, "model_final.pth")
-            log.info(f'Loading pretrained weight from {PROJECT_PATH / weight_path}')
+            log.info(f'Loading trained model from {PROJECT_PATH / weight_path}')
             model_cfg.MODEL.WEIGHTS = weight_path
         model_cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = cfg.test.threshold
         model_cfg.MODEL.DEVICE = cfg.test.testing_device

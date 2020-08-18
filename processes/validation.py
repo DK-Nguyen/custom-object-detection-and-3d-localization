@@ -29,15 +29,11 @@ def validation(cfg: DictConfig) -> None:
     :return: None
     """
 
-    log.info('--- Start Validation using pretrained weight ---')
-    _, _ = register_custom_coco_dataset(cfg=cfg,
-                                        process='train')
-    val_dataset_dicts, val_dataset_metadata = register_custom_coco_dataset(cfg=cfg,
-                                                                           process='val')
+    log.info('--- Start Validation ---')
+    val_dataset_dicts, val_dataset_metadata = register_custom_coco_dataset(cfg=cfg, process='val')
     visualizing_coco_dataset(dataset_dicts=val_dataset_dicts,
                              dataset_metadata=val_dataset_metadata,
                              num_ims=cfg.validation.show_images)
-
     model_cfg: CfgNode = get_model_configs(cfg=cfg, process='val')
     evaluator = COCOEvaluator(dataset_name=cfg.name+'_val',
                               cfg=model_cfg,
