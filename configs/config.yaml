@@ -1,5 +1,5 @@
 defaults:
-  - dataset: coco_tree
+  - dataset: coco_bottle
   - model: mask_rcnn_R_50_FPN_3x
     optional: true
   - dataset_model: ${defaults.0.dataset}_${defaults.1.model}

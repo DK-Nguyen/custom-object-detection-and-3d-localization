@@ -1,5 +1,5 @@
 """
-
+Validate and calculate metrics (provided a validation dataset)
 """
 import os
 from pathlib import Path
@@ -28,7 +28,6 @@ def validation(cfg: DictConfig) -> None:
     :type cfg: omegaconf.dictconfig.DictConfig.
     :return: None
     """
-
     log.info('--- Start Validation ---')
     val_dataset_dicts, val_dataset_metadata = register_custom_coco_dataset(cfg=cfg, process='val')
     visualizing_coco_dataset(dataset_dicts=val_dataset_dicts,

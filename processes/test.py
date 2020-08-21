@@ -1,5 +1,5 @@
 """
-Running inference with the trained model.
+Running inference with the trained model on a test (unseen) dataset.
 """
 from typing import Dict
 import logging

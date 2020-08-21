@@ -1,15 +1,12 @@
 """
-Train  neural networks the the synthesized dataset
+Train  neural networks on the synthesized dataset
 """
-import os
 from pathlib import Path
 from omegaconf import DictConfig
 import logging
 
 from detectron2.engine import DefaultTrainer
 from detectron2.config.config import CfgNode
-from detectron2.evaluation import COCOEvaluator, inference_on_dataset
-from detectron2.data import build_detection_test_loader
 
 from tools import register_custom_coco_dataset, visualizing_coco_dataset, \
                   get_model_configs

@@ -25,7 +25,7 @@ dataset:
         license_url: none
     validation_images_preparation:
         option: Yes
-        labelme_annotating: No
+        labelme_annotating: No  # annotate the ground truth manually
         val_images_dir: datasets/coco_tree/validation/images
         labelme_annotation_dir: datasets/coco_tree/validation/annotations
         converting_labelme_to_coco: No

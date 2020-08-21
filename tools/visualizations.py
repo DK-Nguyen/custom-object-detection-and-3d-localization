@@ -64,7 +64,7 @@ def visualizing_predicted_samples(img: ndarray,
     """
     visualizer: Visualizer = Visualizer(img[:, :, ::-1],
                                         metadata=metadata,
-                                        scale=1,
+                                        scale=0.5,
                                         instance_mode=ColorMode.IMAGE_BW)
     out: VisImage = visualizer.draw_instance_predictions(predicted_samples["instances"].to("cpu"))
     v: ndarray = out.get_image()[:, :, ::-1]

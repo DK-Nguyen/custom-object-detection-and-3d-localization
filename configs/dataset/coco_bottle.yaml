@@ -1,0 +1,32 @@
+dataset:
+    name: coco_tree
+    hard_negative_background_preparation:
+        option: No
+        input_dir: datasets/hard_negatives
+        output_dir: datasets/coco_bottle/backgrounds
+        output_width: 512
+        output_height: 512
+        output_type: png
+    training_images_preparation:
+        option: No
+        name: coco_bottle_train
+        input_dir: datasets/coco_bottle
+        output_dir: datasets/coco_bottle/training
+        num_images: 1000
+        max_foregrounds: 3
+        output_width: 512
+        output_height: 512
+        output_type: png
+        description: synthesized bottle dataset (training)
+        url: none
+        version: train_1.0
+        contributor: DK
+        license_name: free
+        license_url: none
+    validation_images_preparation:
+        option: No
+        labelme_annotating: Yes
+        val_images_dir: datasets/coco_bottle/validation/images
+        labelme_annotation_dir: datasets/coco_bottle/validation/annotations
+        converting_labelme_to_coco: Yes
+        coco_json_path: datasets/coco_bottle/validation/coco_instances.json
