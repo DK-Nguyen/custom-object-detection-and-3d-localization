@@ -5,11 +5,11 @@ dataset_model:
     train_dataset_dir: datasets/coco_bottle/training
     show_images: 3  # 0: don't show, change to an int as the number of images to show
   validation:
-    option: No
+    option: Yes
     val_dataset_dir: datasets/coco_bottle/validation
-    use_pretrained_weight: No
-    pretrained_weight:
-    show_images: 3  # 0: don't show, -1: show all, an int: number of ims to show
+    use_pretrained_weight: Yes
+    pretrained_weight: weights/coco_bottle.pth
+    show_images: -1  # 0: don't show, -1: show all, an int: number of ims to show
   test:
     option: Yes
     test_dataset_dir: datasets/coco_bottle/testing
@@ -18,7 +18,7 @@ dataset_model:
     threshold: 0.5
     testing_device: cuda  # use cpu or cuda
     saving_predicted_ims: Yes
-    show_predicted_ims: Yes
+    show_predicted_ims: No
   model:
     config_url: COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml
     num_workers: 2
@@ -26,4 +26,4 @@ dataset_model:
     lr: !!float 0.0005
     max_iter: 1000
     batch_size_per_im: 128
-    num_classes: 1  # only 1 class (tree)
+    num_classes: 1

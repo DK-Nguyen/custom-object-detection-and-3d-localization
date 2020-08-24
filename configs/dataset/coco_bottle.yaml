@@ -24,7 +24,7 @@ dataset:
         license_name: free
         license_url: none
     validation_images_preparation:
-        option: No
+        option: Yes
         labelme_annotating: Yes
         val_images_dir: datasets/coco_bottle/validation/images
         labelme_annotation_dir: datasets/coco_bottle/validation/annotations

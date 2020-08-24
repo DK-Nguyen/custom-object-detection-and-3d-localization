@@ -1,4 +1,5 @@
 
+from random import randint
 from PIL import Image
 from pathlib import Path
 import logging
@@ -57,13 +58,11 @@ class HardNegativeBackgroundPreparation:
         """
         Read the background images, resize them to the given (height, width),
         put the foreground on the desired position
-        (currently there is one position: middle_bottom, otherwise the foreground will be at (0,0))
+        (currently there is one position: middle_bottom, otherwise the foreground will
+        put at a random place on the background image)
 
-        :param height: the height of the output image
-        :type height: int
-        :param width: the width of the ouput image
-        :type width: int
         :param position: the relative position to put the foreground on the background
+        :type position: string. Default: 'middle_bottom'
         :return: none
         """
         self._validate_arguments()
@@ -78,16 +77,24 @@ class HardNegativeBackgroundPreparation:
             for fg_im_path in fg_im_list:
                 fg_im = Image.open(fg_im_path).convert('RGBA')
                 bg_im = Image.open(bg_im_path).convert('RGBA')
-                bg_im = bg_im.resize((self.height, self.width))
+                bg_width, bg_height = bg_im.size
+                fg_width, fg_height = fg_im.size
+                if bg_width < fg_width*2:
+                    raise Exception(f"Background image {bg_im_path}'s width is less than"
+                                    f"2 times foreground image {fg_im_path}'s width")
+                if bg_height < fg_height*2:
+                    raise Exception(f"Background image {bg_im_path}'s height is less than"
+                                    f"foreground image {fg_im_path}'s height + 100")
                 # put the foreground to the desired position
                 if position == 'middle_bottom':
-                    x_pos = int((self.width - fg_im.size[1]) / 2)
-                    y_pos = int(self.height - fg_im.size[0])
+                    x_pos = int((bg_width - fg_width) / 2)
+                    y_pos = int(bg_height - fg_im.height)
                 else:
-                    x_pos = 0
-                    y_pos = 0
+                    x_pos = randint(fg_width, bg_width-fg_width)
+                    y_pos = randint(fg_height, bg_height-fg_height)
                 bg_im.paste(fg_im, (x_pos, y_pos), mask=fg_im)
-                save_filename = f'{im_counter:0{4}}{self.output_type}'  # e.g. 0001.png
+                bg_im = bg_im.resize((self.width, self.height))
+                save_filename = f'{im_counter:0{4}}{self.output_type}'  # e.g. 0000.png
                 output_path = Path(self.output_dir / save_filename)
                 bg_im.convert('RGB').save(output_path)
                 im_counter += 1

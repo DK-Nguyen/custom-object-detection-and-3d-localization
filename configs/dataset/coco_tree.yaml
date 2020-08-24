@@ -1,30 +1,31 @@
 dataset:
     name: coco_tree
     hard_negative_background_preparation:
-        option: No
-        input_dir: datasets/hard_negatives
+        option: Yes
+        input_dir: datasets/coco_tree/hard_negatives
         output_dir: datasets/coco_tree/backgrounds
-        output_width: 512
-        output_height: 512
+        output_width: 1982
+        output_height: 1218
         output_type: png
+        position: middle_bottom  # position can be: "middle_bottom",
     training_images_preparation:
         option: No
         name: coco_tree_train
-        input_dir: datasets/coco_tree
-        output_dir: datasets/coco_tree/training_subset
-        num_images: 200
+        input_dir: datasets/coco_tree  # the dir that contains /foregrounds and /backgrounds
+        output_dir: datasets/coco_tree/training
+        num_images: 2000
         max_foregrounds: 15
         output_width: 512
         output_height: 512
         output_type: png
         description: synthesized tree dataset (training)
         url: none
-        version: train_1.0
+        version: train_2.0
         contributor: DK
         license_name: free
         license_url: none
     validation_images_preparation:
-        option: Yes
+        option: No
         labelme_annotating: No  # annotate the ground truth manually
         val_images_dir: datasets/coco_tree/validation/images
         labelme_annotation_dir: datasets/coco_tree/validation/annotations

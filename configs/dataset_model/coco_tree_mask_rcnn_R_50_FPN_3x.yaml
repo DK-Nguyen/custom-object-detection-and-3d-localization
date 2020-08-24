@@ -15,7 +15,7 @@ dataset_model:
     test_dataset_dir: datasets/coco_tree/testing
     use_pretrained_weight: No
     pretrained_weight:
-    threshold: 0.5
+    threshold: 0.7
     testing_device: cuda  # use cpu or cuda
     saving_predicted_ims: Yes
     show_predicted_ims: Yes
@@ -24,6 +24,6 @@ dataset_model:
     num_workers: 2
     ims_per_batch: 2
     lr: !!float 0.0005
-    max_iter: 3000
+    max_iter: 2000
     batch_size_per_im: 128
     num_classes: 1  # only 1 class (tree)

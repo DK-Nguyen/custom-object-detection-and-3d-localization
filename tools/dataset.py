@@ -46,7 +46,7 @@ def dataset_creation(cfg: DictConfig) -> None:
             output_height=cfg.hard_negative_background_preparation.output_height,
             output_type=cfg.hard_negative_background_preparation.output_type
         )
-        hnbg.compose_images(position='middle_bottom')
+        hnbg.compose_images(position=cfg.hard_negative_background_preparation.position)
         log.info('Done preparing hard negative background images')
 
     if cfg.training_images_preparation.option:
