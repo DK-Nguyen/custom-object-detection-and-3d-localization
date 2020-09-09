@@ -64,9 +64,8 @@ def dataset_creation(cfg: DictConfig) -> None:
             raise Exception('Validation images directory does not exist')
         labelme_annotation_dir: Path = PROJECT_PATH / val_cfg.labelme_annotation_dir
         if val_cfg.labelme_annotating:
-            pass
             os.system(f'labelme {val_images_dir} --output {labelme_annotation_dir} '
-                      f'--nodata --autosave --logger-level debug')
+                      f'--nodata --autosave')
         if val_cfg.converting_labelme_to_coco:
             coco_json_path: str = str(PROJECT_PATH / val_cfg.coco_json_path)
             log.info(f'Converting labelme annotations from {labelme_annotation_dir} \n'
@@ -262,7 +261,6 @@ class _Labelme2coco(object):
         return data_coco
 
     def save_json(self):
-        # log.info(f'Save COCO instances converted from labelme format to {self.save_json_path}')
         self.data_transfer()
         self.data_coco = self.data2coco()
         json.dump(self.data_coco, open(self.save_json_path, "w"), indent=4)

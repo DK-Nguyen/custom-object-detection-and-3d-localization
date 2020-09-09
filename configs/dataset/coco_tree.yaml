@@ -1,17 +1,17 @@
 dataset:
     name: coco_tree
     hard_negative_background_preparation:
-        option: Yes
+        option: No
         input_dir: datasets/coco_tree/hard_negatives
         output_dir: datasets/coco_tree/backgrounds
         output_width: 1982
         output_height: 1218
         output_type: png
-        position: middle_bottom  # position can be: "middle_bottom",
+        position: middle_bottom  # position can be: "middle_bottom"
     training_images_preparation:
         option: No
         name: coco_tree_train
-        input_dir: datasets/coco_tree  # the dir that contains /foregrounds and /backgrounds
+        input_dir: datasets/coco_tree  # the dir that contains /foregrounds and /backgrounds dirs
         output_dir: datasets/coco_tree/training
         num_images: 2000
         max_foregrounds: 15
@@ -25,9 +25,9 @@ dataset:
         license_name: free
         license_url: none
     validation_images_preparation:
-        option: No
+        option: Yes
         labelme_annotating: No  # annotate the ground truth manually
         val_images_dir: datasets/coco_tree/validation/images
         labelme_annotation_dir: datasets/coco_tree/validation/annotations
-        converting_labelme_to_coco: No
+        converting_labelme_to_coco: Yes
         coco_json_path: datasets/coco_tree/validation/coco_instances.json

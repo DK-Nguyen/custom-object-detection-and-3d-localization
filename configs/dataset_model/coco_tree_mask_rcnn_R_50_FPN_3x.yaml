@@ -1,24 +1,24 @@
 dataset_model:
   name: coco_tree_mask_rcnn_R_50_FPN_3x
   train:
-    option: Yes
+    option: No
     train_dataset_dir: datasets/coco_tree/training
     show_images: 3  # 0: don't show, change to an int as the number of images to show
   validation:
     option: Yes
     val_dataset_dir: datasets/coco_tree/validation
-    use_pretrained_weight: No
-    pretrained_weight:
+    use_pretrained_weight: Yes
+    pretrained_weight: weights/coco_tree_mask_rcnn.pth
     show_images: 3  # 0: don't show, -1: show all, an int: number of ims to show
   test:
     option: Yes
     test_dataset_dir: datasets/coco_tree/testing
-    use_pretrained_weight: No
-    pretrained_weight:
-    threshold: 0.7
+    use_pretrained_weight: Yes
+    pretrained_weight: weights/coco_tree_mask_rcnn.pth
+    threshold: 0.5
     testing_device: cuda  # use cpu or cuda
     saving_predicted_ims: Yes
-    show_predicted_ims: Yes
+    show_predicted_ims: No
   model:
     config_url: COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml
     num_workers: 2

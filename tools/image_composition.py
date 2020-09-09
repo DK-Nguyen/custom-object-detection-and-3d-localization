@@ -26,7 +26,8 @@ class MaskJsonUtils:
     """
 
     def __init__(self, output_dir):
-        """ Initializes the class.
+        """
+        Initializes the class.
         Args:
             output_dir: the directory where the definition file will be saved
         """
@@ -35,7 +36,8 @@ class MaskJsonUtils:
         self.super_categories = dict()
 
     def add_category(self, category, super_category):
-        """ Adds a new category to the set of the corresponding super_category
+        """
+        Adds a new category to the set of the corresponding super_category
         Args:
             category: e.g. 'eagle'
             super_category: e.g. 'bird'
@@ -55,7 +57,8 @@ class MaskJsonUtils:
         return True # Addition was successful
 
     def add_mask(self, image_path, mask_path, color_categories):
-        """ Takes an image path, its corresponding mask path, and its color categories,
+        """
+        Takes an image path, its corresponding mask path, and its color categories,
             and adds it to the appropriate dictionaries
         Args:
             image_path: the relative path to the image, e.g. './images/00000001.png'
@@ -67,7 +70,7 @@ class MaskJsonUtils:
             True if successful, False if the image was already in the dictionary
         """
         if self.masks.get(image_path):
-            return False # image/mask is already in the dictionary
+            return False  # image/mask is already in the dictionary
 
         # Create the mask definition
         mask = {
@@ -82,16 +85,18 @@ class MaskJsonUtils:
         for _, item in color_categories.items():
             self.add_category(item['category'], item['super_category'])
 
-        return True # Addition was successful
+        return True  # Addition was successful
 
     def get_masks(self):
-        """ Gets all masks that have been added
+        """
+        Gets all masks that have been added
         """
         return self.masks
 
     def get_super_categories(self):
-        """ Gets the dictionary of super categories for each category in a JSON
-            serializable format
+        """
+        Gets the dictionary of super categories for each category in a JSON
+        serializable format
         Returns:
             A dictionary of lists of categories keyed on super_category
         """
@@ -102,7 +107,8 @@ class MaskJsonUtils:
         return serializable_super_cats
 
     def write_masks_to_json(self):
-        """ Writes all masks and color categories to the output file path as JSON
+        """
+        Writes all masks and color categories to the output file path as JSON
         """
         # Serialize the masks and super categories dictionaries
         serializable_masks = self.get_masks()
@@ -119,8 +125,9 @@ class MaskJsonUtils:
 
 
 class ImageComposition:
-    """ Composes images together in random ways, applying transformations to the foreground to create a synthetic
-        combined image.
+    """
+    Composes images together in random ways, applying transformations to the foreground to create a synthetic
+    combined image.
     """
 
     def __init__(self,
@@ -149,9 +156,9 @@ class ImageComposition:
 
         # Validate the width and height
         assert self.cfg.output_width >= 64, 'width must be greater than 64'
-        self.width = self.cfg.output_width
+        self.output_width = self.cfg.output_width
         assert self.cfg.output_height >= 64, 'height must be greater than 64'
-        self.height = self.cfg.output_height
+        self.output_height = self.cfg.output_height
 
         # Validate and process the output type
         if self.cfg.output_type is None:
@@ -243,7 +250,8 @@ class ImageComposition:
                 continue
 
             if image_file.suffix not in self.allowed_background_types:
-                warnings.warn(f'background must match an accepted type {str(self.allowed_background_types)}, ignoring: {image_file}')
+                warnings.warn(f'background must match an accepted type '
+                              f'{str(self.allowed_background_types)}, ignoring: {image_file}')
                 continue
 
             # Valid file, add to backgrounds list
@@ -252,9 +260,11 @@ class ImageComposition:
         assert len(self.backgrounds) > 0, 'no valid backgrounds were found'
 
     def _generate_images(self):
-        # Generates a number of images and creates segmentation masks, then
-        # saves a mask_definitions.json file that describes the dataset.
-
+        """
+        Generates a number of images and creates segmentation masks, then
+        saves a mask_definitions.json file that describes the dataset.
+        :return:
+        """
         log.info(f'Generating {self.num_images} images with masks...')
 
         mju = MaskJsonUtils(self.output_dir)
@@ -276,10 +286,10 @@ class ImageComposition:
                 mask_rgb_color = self.mask_colors[fg_i]
 
                 foregrounds.append({
-                    'super_category':super_category,
-                    'category':category,
-                    'foreground_path':foreground_path,
-                    'mask_rgb_color':mask_rgb_color
+                    'super_category': super_category,
+                    'category': category,
+                    'foreground_path': foreground_path,
+                    'mask_rgb_color': mask_rgb_color
                 })
 
             # Compose foregrounds and background
@@ -291,12 +301,12 @@ class ImageComposition:
             # Save composite image to the images sub-directory
             composite_filename = f'{save_filename}{self.output_type}'  # e.g. 00000023.jpg
             composite_path = self.output_dir / 'images' / composite_filename  # e.g. my_output_dir/images/00000023.jpg
-            composite = composite.convert('RGB') # remove alpha
+            composite = composite.convert('RGB')  # remove alpha
             composite.save(composite_path)
 
             # Save the mask image to the masks sub-directory
-            mask_filename = f'{save_filename}.png' # masks are always png to avoid lossy compression
-            mask_path = self.output_dir / 'masks' / mask_filename # e.g. my_output_dir/masks/00000023.png
+            mask_filename = f'{save_filename}.png'  # masks are always png to avoid lossy compression
+            mask_path = self.output_dir / 'masks' / mask_filename  # e.g. my_output_dir/masks/00000023.png
             mask.save(mask_path)
 
             color_categories = dict()
@@ -305,8 +315,8 @@ class ImageComposition:
                 mju.add_category(fg['category'], fg['super_category'])
                 color_categories[str(fg['mask_rgb_color'])] = \
                     {
-                        'category':fg['category'],
-                        'super_category':fg['super_category']
+                        'category': fg['category'],
+                        'super_category': fg['super_category']
                     }
             
             # Add the mask to MaskJsonUtils
@@ -316,38 +326,37 @@ class ImageComposition:
                 color_categories
             )
 
-        #Write masks to json
+        # Write masks to json
         mju.write_masks_to_json()
 
     def _compose_images(self, foregrounds, background_path):
-        # Composes a foreground image and a background image and creates a segmentation mask
-        # using the specified color. Validation should already be done by now.
-        # Args:
-        #     foregrounds: a list of dicts with format:
-        #       [{
-        #           'super_category':super_category,
-        #           'category':category,
-        #           'foreground_path':foreground_path,
-        #           'mask_rgb_color':mask_rgb_color
-        #       },...]
-        #     background_path: the path to a valid background image
-        # Returns:
-        #     composite: the composed image
-        #     mask: the mask image
-
+        """
+        Composes a foreground image and a background image and creates a segmentation mask
+        using the specified color. Validation should already be done by now.
+        :param foregrounds: a list of dicts with format:
+              [{
+                  'super_category':super_category,
+                  'category':category,
+                  'foreground_path':foreground_path,
+                  'mask_rgb_color':mask_rgb_color
+              },...]
+        :param background_path: the path to a valid background image
+        :return composite: the composed image
+        :return mask: the mask image
+        """
         # Open background and convert to RGBA
         background = Image.open(background_path)
         background = background.convert('RGBA')
 
-        # Crop background to desired size (self.width x self.height), randomly positioned
+        # Crop background to desired size (self.output_width x self.output_height), randomly positioned
         bg_width, bg_height = background.size
-        max_crop_x_pos = bg_width - self.width
-        max_crop_y_pos = bg_height - self.height
-        assert max_crop_x_pos >= 0, f'desired width, {self.width}, is greater than background width, {bg_width}, for {str(background_path)}'
-        assert max_crop_y_pos >= 0, f'desired height, {self.height}, is greater than background height, {bg_height}, for {str(background_path)}'
-        crop_x_pos = random.randint(0, max_crop_x_pos)
-        crop_y_pos = random.randint(0, max_crop_y_pos)
-        composite = background.crop((crop_x_pos, crop_y_pos, crop_x_pos + self.width, crop_y_pos + self.height))
+        max_crop_x_pos = bg_width - self.output_width
+        max_crop_y_pos = bg_height - self.output_height
+        assert max_crop_x_pos >= 0, f'desired width, {self.output_width}, ' \
+                                    f'is greater than background width, {bg_width}, for {str(background_path)}'
+        assert max_crop_y_pos >= 0, f'desired height, {self.output_height}, ' \
+                                    f'is greater than background height, {bg_height}, for {str(background_path)}'
+        composite = background.resize(size=(self.output_width, self.output_height))
         composite_mask = Image.new('RGB', composite.size, 0)
 
         for fg in foregrounds:
@@ -360,16 +369,17 @@ class ImageComposition:
             max_x_position = composite.size[0] - fg_image.size[0]
             max_y_position = composite.size[1] - fg_image.size[1]
             assert max_x_position >= 0 and max_y_position >= 0, \
-            f'foreground {fg_path} is too big ({fg_image.size[0]}x{fg_image.size[1]}) for the requested output size ({self.width}x{self.height}), check your input parameters'
+                f'foreground {fg_path} is too big ({fg_image.size[0]}x{fg_image.size[1]}) ' \
+                f'for the requested output size ({self.output_width}x{self.output_height}), check your input parameters'
             paste_position = (random.randint(0, max_x_position), random.randint(0, fg_image.size[1]))
 
             # Create a new foreground image as large as the composite and paste it on top
-            new_fg_image = Image.new('RGBA', composite.size, color = (0, 0, 0, 0))
+            new_fg_image = Image.new('RGBA', composite.size, color=(0, 0, 0, 0))
             new_fg_image.paste(fg_image, paste_position)
 
             # Extract the alpha channel from the foreground and paste it into a new image the size of the composite
             alpha_mask = fg_image.getchannel(3)
-            new_alpha_mask = Image.new('L', composite.size, color = 0)
+            new_alpha_mask = Image.new('L', composite.size, color=0)
             new_alpha_mask.paste(alpha_mask, paste_position)
             composite = Image.composite(new_fg_image, composite, new_alpha_mask)
 
@@ -409,7 +419,7 @@ class ImageComposition:
         fg_image = fg_image.resize(new_size, resample=Image.BICUBIC)
 
         # Adjust foreground brightness
-        brightness_factor = random.random() * .4 + .7 # Pick something between .7 and 1.1
+        brightness_factor = random.random() * .4 + .7  # Pick something between .7 and 1.1
         enhancer = ImageEnhance.Brightness(fg_image)
         fg_image = enhancer.enhance(brightness_factor)
 

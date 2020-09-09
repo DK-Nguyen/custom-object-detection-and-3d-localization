@@ -1,4 +1,3 @@
-import os
 import hydra
 from omegaconf import DictConfig
 import logging
@@ -11,11 +10,10 @@ __all__ = ['main']
 log: logging.Logger = logging.getLogger(__name__)  # A logger for this file
 
 
-# TODO: solve the problem of image size in image_composition, try to put bigger trees in the dataset
+# TODO: 3D reconstruction
 @hydra.main(config_path="configs/config.yaml")
 def main(cfg: DictConfig) -> None:
     log.info(f'Configurations:\n{cfg.pretty()}')
-    log.info(f'Output directory: {os.getcwd()}')
 
     if cfg.workflow.dataset_creation:
         dataset_creation(cfg.dataset)
