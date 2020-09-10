@@ -46,6 +46,9 @@ def test(cfg: DictConfig):
         img: ndarray = cv2.imread(str(test_im))
         outputs: Dict = predictor(img)
         path_to_save: str = str(output_dir/test_im.name) if cfg.test.saving_predicted_ims else None
+        # TODO: if cfg.map_3d_points is yes, then check if finding the path to the file \
+        #  that contains the points. If found, then map and display the points of the \
+        #  detected objects.
         visualizing_predicted_samples(img=img,
                                       metadata=coco_tree_metadata,
                                       predicted_samples=outputs,

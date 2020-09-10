@@ -3,12 +3,11 @@ defaults:
   - model: mask_rcnn_R_50_FPN_3x
     optional: true
   - dataset_model: ${defaults.0.dataset}_${defaults.1.model}
-  - reconstruct_3d: tree
-  - hydra/job_logging: colorlog  # additional logging config
-  - hydra/hydra_logging: colorlog  # additional logging config
+  - reconstruct_3d: ${defaults.0.dataset}_reconstruct_3d
+  - hydra/job_logging: colorlog
+  - hydra/hydra_logging: colorlog
 
 workflow:
   dataset_creation: No
-  dnn_method: No
   reconstruct_3d: Yes
-
+  dnn_method: No

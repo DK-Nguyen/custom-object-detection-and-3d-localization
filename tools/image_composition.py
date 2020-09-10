@@ -13,6 +13,7 @@ from PIL import Image, ImageEnhance
 from omegaconf import DictConfig
 import logging
 
+from tools import constants
 
 __all__ = ["ImageComposition"]
 

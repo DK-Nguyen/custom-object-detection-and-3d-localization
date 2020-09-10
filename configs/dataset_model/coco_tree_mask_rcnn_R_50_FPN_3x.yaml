@@ -19,6 +19,8 @@ dataset_model:
     testing_device: cuda  # use cpu or cuda
     saving_predicted_ims: Yes
     show_predicted_ims: No
+    map_3d_points: No
+    3d_points_path:
   model:
     config_url: COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml
     num_workers: 2

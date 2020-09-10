@@ -12,10 +12,11 @@ from PIL import Image
 from omegaconf import DictConfig
 import logging
 
+from tools import constants
+
 __all__ = ["CocoJsonCreator"]
 
 PROJECT_PATH = Path(__file__).parents[1]  # get directory 2 levels up
-
 # A logger for this file
 log = logging.getLogger(__name__)
 
