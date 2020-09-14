@@ -17,6 +17,8 @@ PROJECT_PATH = Path(__file__).parents[1]  # get directory 2 levels up
 log = logging.getLogger(__name__)  # A logger for this file
 
 
+# TODO: experiment with TensorMask
+#  (https://github.com/facebookresearch/detectron2/tree/master/projects/TensorMask)
 def train(cfg: DictConfig) -> None:
     """
     Transfer learning using models from detectron2 model zoo.

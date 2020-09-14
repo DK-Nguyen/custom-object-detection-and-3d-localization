@@ -20,6 +20,8 @@ PROJECT_PATH = Path(__file__).parents[1]  # get directory 2 levels up
 log = logging.getLogger(__name__)  # A logger for this file
 
 
+# TODO: experiment with other test datasets
+#  (e.g. https://vision.middlebury.edu/stereo/data/scenes2014/)
 def test(cfg: DictConfig):
     """
     Running inference on an unseen dataset.

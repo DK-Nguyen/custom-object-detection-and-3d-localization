@@ -10,10 +10,6 @@ __all__ = ['main']
 log: logging.Logger = logging.getLogger(__name__)  # A logger for this file
 
 
-# TODO: 3D reconstruction
-# TODO: experiment with TensorMask (https://github.com/facebookresearch/detectron2/tree/master/projects/TensorMask)
-# TODO: experiment with other test datasets (e.g. https://vision.middlebury.edu/stereo/data/scenes2014/)
-
 @hydra.main(config_path="configs/config.yaml")
 def main(cfg: DictConfig) -> None:
     log.info(f'Configurations:\n{cfg.pretty()}')
@@ -37,4 +33,3 @@ def main(cfg: DictConfig) -> None:
 
 if __name__ == '__main__':
     main()
-
