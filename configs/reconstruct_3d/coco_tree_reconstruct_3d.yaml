@@ -3,5 +3,5 @@ reconstruct_3d:
     left_ims_dir: datasets/coco_tree/testing/left_images
     right_ims_dir:  datasets/coco_tree/testing/right_images
     disparity_maps_dir: datasets/coco_tree/testing/disparity_maps
-    stereo_params: datasets/coco_tree/testing/stereoParams.mat
+    stereo_params: datasets/coco_tree/testing/stereoParams.yaml
     output_dir: datasets/coco_tree/testing/3d_points

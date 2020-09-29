@@ -9,7 +9,8 @@ from numpy import ndarray
 from detectron2.data.catalog import Metadata
 from detectron2.utils.visualizer import Visualizer, VisImage, ColorMode
 
-__all__ = ['visualizing_coco_dataset', 'visualizing_predicted_samples']
+__all__ = ['visualizing_coco_dataset', 'visualizing_predicted_samples',
+           'visualizing_triplets']
 
 
 def visualizing_coco_dataset(dataset_dicts: List[Dict],
@@ -74,3 +75,26 @@ def visualizing_predicted_samples(img: ndarray,
         cv2.imshow('', v)
         cv2.waitKey()
         cv2.destroyAllWindows()
+
+
+def visualizing_triplets(left_im: ndarray,
+                         right_im: ndarray,
+                         disp_map:ndarray)\
+        -> None:
+    """
+
+    :param left_im:
+    :param right_im:
+    :param disp_map:
+    :return:
+    """
+
+    cv2.imshow('left im', left_im)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+    cv2.imshow('right im', right_im)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+    cv2.imshow('disparity map', disp_map)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()

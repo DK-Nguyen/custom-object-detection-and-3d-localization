@@ -1,7 +1,7 @@
 """
 Doing 3D reconstruction from depth map
 """
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Union
 import logging
 from pathlib import Path
 from omegaconf import DictConfig
@@ -10,12 +10,13 @@ import numpy as np
 from numpy import ndarray
 import cv2
 import tifffile as tiff
+import yaml
 
 from matlab import mlarray
 from matlab.engine import start_matlab
 from matlab.engine.matlabengine import MatlabEngine
 
-from tools import constants
+from tools import constants, visualizing_triplets
 
 __all__ = ['reconstruct_3d']
 
@@ -63,8 +64,8 @@ def _do_reconstruction_matlab(stereo_params_path: str,
                               disparity_maps_paths: List) \
         -> None:
     """
-    Do reconstruction from stereo images, stereo params, and depth maps
-    using matlab engine.
+    Do reconstruction from stereo images, stereo params, and depth maps using matlab engine.
+    (not working yet)
 
     :param stereo_params_path:
     :param left_ims_paths:
@@ -96,48 +97,137 @@ def _do_reconstruction_matlab(stereo_params_path: str,
     # log.info(f'--- Debugging2 ---')
 
 
-# TODO: 3D reconstruction (using disparity map, stereo params and stereo images)
+def _reconstruct_no_params(left_im: ndarray,
+                           disparity_map: ndarray)\
+        -> ndarray:
+    """
+    Do 3D reconstruction from an image and a corresponding disparity map without stereo parameters.
+
+    :param left_im: the ndarray of the left image
+    :type left_im: ndarray of shape (height, width, 3)
+    :param disparity_map: the ndarray of the depth map
+    :type disparity_map: ndarray of shape (height, width)
+    :return points_3d: a 3-channel ndarray representing a 3D surface
+    :rtype points_3d: ndarray of shape (height, width, 3)
+    """
+    h, w = left_im.shape[:2]
+    focal_length = 0.8 * w
+    # Perspective transformation matrix
+    Q: ndarray = np.float32([[1, 0, 0, -w / 2.0],
+                             [0, -1, 0, h / 2.0],
+                             [0, 0, 0, -focal_length],
+                             [0, 0, 1, 0]])
+    points_3d: ndarray = cv2.reprojectImageTo3D(disparity_map, Q)
+    return points_3d
+
+
+def _trim_im(im: ndarray,
+             desired_height: int,
+             desired_width: int)\
+        -> ndarray:
+    """
+    Trimming the image to the desired height and width, assuming that the image
+    has bigger size than the desired size.
+
+    :param im: the image in ndarray
+    :type im: ndarray with size [height, width]
+    :param desired_height:
+    :param desired_width:
+    :return:
+    """
+    trimmed_im: ndarray = im
+    im_height: int = im.shape[0]
+    im_width: int = im.shape[1]
+
+    if im_height != desired_height:
+        height_difference: int = im_height - desired_height
+        trimmed_im = trimmed_im[height_difference//2: im_height-height_difference//2, :]
+    if im_width != desired_width:
+        width_difference: int = im_width - desired_width
+        trimmed_im = trimmed_im[:, width_difference//2: im_width-width_difference//2]
+
+    return trimmed_im
+
+
+def _check_sizes(left_im: ndarray,
+                 right_im: ndarray,
+                 points_3d: ndarray):
+    pass
+
+
+def _reconstruct_stereo_params(stereo_params: Dict,
+                               left_im: ndarray,
+                               right_im: ndarray,
+                               disparity_map: ndarray)\
+        -> Tuple[ndarray, ndarray, ndarray]:
+    """
+    Trimming the left im, right im and disparity map if they are bigger than the size given in the stereo params,
+    do 3D points reconstruction, then save all of these into output folder
+
+    :param stereo_params:
+    :param left_im:
+    :param disparity_map:
+    :return:
+    """
+    camera_matrix1: ndarray = np.array(stereo_params['cameraMatrix1'])
+    camera_matrix2: ndarray = np.array(stereo_params['cameraMatrix2'])
+    distortion_coeffs1: ndarray = np.array(stereo_params['distCoeffs1'])
+    distortion_coeffs2: ndarray = np.array(stereo_params['distCoeffs2'])
+    image_size: Tuple = tuple(stereo_params['image_size'])
+    rotation_matrix: ndarray = np.array(stereo_params['R'])
+    translation_vector: ndarray = np.array(stereo_params['T'])
+
+    trimmed_disp_map: ndarray = _trim_im(im=disparity_map, desired_height=image_size[0], desired_width=image_size[1])
+    trimmed_left_im: ndarray = _trim_im(im=left_im, desired_height=image_size[0], desired_width=image_size[1])
+    trimmed_right_im: ndarray = _trim_im(im=right_im, desired_height=image_size[0], desired_width=image_size[1])
+    # visualizing_triplets(left_im=trimmed_left_im, right_im=trimmed_right_im, disp_map=trimmed_disp_map)
+
+    _, _, _, _, reprojection_matrix, _, _ = cv2.stereoRectify(cameraMatrix1=camera_matrix1,
+                                                              distCoeffs1=distortion_coeffs1,
+                                                              cameraMatrix2=camera_matrix2,
+                                                              distCoeffs2=distortion_coeffs2,
+                                                              imageSize=image_size,
+                                                              R=rotation_matrix,
+                                                              T=translation_vector)
+
+    points_3d: ndarray = cv2.reprojectImageTo3D(disparity=trimmed_disp_map,
+                                                Q=reprojection_matrix)
+
+    # TODO: check the images (if they are in the same size and satisfy other conditions)
+
+    # TODO: save the trimmed_left_im, trimmed_right_im, points_3d to disk (so we can run the
+    #  neural network and visualize the results later)
+
+    return trimmed_left_im, trimmed_right_im, points_3d
+
+
 def _do_reconstruction_opencv(left_ims_paths: List,
                               right_ims_paths: List,
                               disparity_maps_paths: List,
-                              stereo_params_path: str):
-    left_im = cv2.imread(str(left_ims_paths[0]))
-    right_im = cv2.imread(str(right_ims_paths[0]))
-    disparity_map = tiff.imread(str(disparity_maps_paths[0]))
+                              stereo_params_path: Union[str, None]):
+    """
 
-    # cv2.imshow('left im', left_im)
-    # cv2.waitKey(0)
-    # cv2.destroyAllWindows()
-    # cv2.imshow('right im', right_im)
-    # cv2.waitKey(0)
-    # cv2.destroyAllWindows()
-    # cv2.imshow('disparity map', disparity_map)
-    # cv2.waitKey(0)
-    # cv2.destroyAllWindows()
+    :param left_ims_paths:
+    :param right_ims_paths:
+    :param disparity_maps_paths:
+    :param stereo_params_path:
+    :return:
+    """
 
-    # reproject without stereo params provided
+    left_im: ndarray = cv2.imread(str(left_ims_paths[0]))
+    right_im: ndarray = cv2.imread(str(right_ims_paths[0]))
+    disparity_map: ndarray = tiff.imread(str(disparity_maps_paths[0]))
+
     if stereo_params_path is None:
-        h, w = left_im.shape[:2]
-        focal_length = 0.8 * w
-        # Perspective transformation matrix
-        Q = np.float32([[1, 0, 0, -w/2.0],
-                        [0,-1, 0,  h/2.0],
-                        [0, 0, 0, -focal_length],
-                        [0, 0, 1, 0]])
-        points_3d = cv2.reprojectImageTo3D(disparity_map, Q)
-        points_3d_channel0 = points_3d[:, :, 0]
-        points_3d_channel1 = points_3d[:, :, 1]
-        points_3d_channel2 = points_3d[:, :, 2]
-
-        cv2.imshow('3d points', points_3d_channel0)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
-        cv2.imshow('3d points', points_3d_channel1)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
-        cv2.imshow('3d points', points_3d_channel2)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        points_3d: ndarray = _reconstruct_no_params(left_im=left_im,
+                                                    disparity_map=disparity_map)
+    else:
+        stereo_params: Dict = yaml.load(stream=open(stereo_params_path),
+                                        Loader=yaml.FullLoader)
+        _, _, _ = _reconstruct_stereo_params(stereo_params=stereo_params,
+                                                        left_im=left_im,
+                                                        right_im=right_im,
+                                                        disparity_map=disparity_map)
 
 
 def reconstruct_3d(cfg: DictConfig):
@@ -152,16 +242,19 @@ def reconstruct_3d(cfg: DictConfig):
                                 right_ims_dir=cfg.right_ims_dir,
                                 disparity_maps_dir=cfg.disparity_maps_dir)
 
-    stereo_params_path = str(PROJECT_PATH/cfg.stereo_params)
+    if cfg.stereo_params is not None:
+        stereo_params_path = str(PROJECT_PATH/cfg.stereo_params)
+    else:
+        stereo_params_path = None
 
     # _do_reconstruction_matlab(stereo_params_path=stereo_params_path,
     #                           left_ims_paths=left_ims_paths,
     #                           right_ims_paths=right_ims_paths,
     #                           disparity_maps_paths=disparity_maps_paths)
 
-    _do_reconstruction_opencv(stereo_params_path=stereo_params_path,
-                              left_ims_paths=left_ims_paths,
+    _do_reconstruction_opencv(left_ims_paths=left_ims_paths,
                               right_ims_paths=right_ims_paths,
-                              disparity_maps_paths=disparity_maps_paths)
+                              disparity_maps_paths=disparity_maps_paths,
+                              stereo_params_path=stereo_params_path)
 
     log.info(f'--- Done 3d reconstruction ---')
