@@ -12,6 +12,7 @@ import cv2
 import tifffile as tiff
 import yaml
 
+
 from matlab import mlarray
 from matlab.engine import start_matlab
 from matlab.engine.matlabengine import MatlabEngine
@@ -149,26 +150,41 @@ def _trim_im(im: ndarray,
     return trimmed_im
 
 
-def _check_sizes(left_im: ndarray,
-                 right_im: ndarray,
-                 points_3d: ndarray):
-    pass
+def _check_image_sizes(left_im: ndarray,
+                       right_im: ndarray,
+                       points_3d: ndarray):
+    """
+    Check if the left_im, right_im, and points_3d have the same size
+
+    :param left_im:
+    :param right_im:
+    :param points_3d:
+    :return:
+    """
+    if not left_im.shape == right_im.shape:
+        raise Exception(f'left image shape: {left_im.shape} and right image shape: {right_im.shape} '
+                        f'are different')
+    if not left_im.shape == points_3d.shape:
+        raise Exception(f'left image shape: {left_im.shape} and points cloud shape: {points_3d.shape} '
+                        f'are different')
 
 
 def _reconstruct_stereo_params(stereo_params: Dict,
-                               left_im: ndarray,
-                               right_im: ndarray,
-                               disparity_map: ndarray)\
+                               left_im_path: Union[str, Path],
+                               right_im_path: Union[str, Path],
+                               disparity_map_path: Union[str, Path],)\
         -> Tuple[ndarray, ndarray, ndarray]:
     """
-    Trimming the left im, right im and disparity map if they are bigger than the size given in the stereo params,
-    do 3D points reconstruction, then save all of these into output folder
+    Trimming the a left image, a right image and their corresponding disparity map if they are
+    bigger than the size given in the stereo params, then do 3D points reconstruction.
 
     :param stereo_params:
     :param left_im:
     :param disparity_map:
+    :param output_dir:
     :return:
     """
+
     camera_matrix1: ndarray = np.array(stereo_params['cameraMatrix1'])
     camera_matrix2: ndarray = np.array(stereo_params['cameraMatrix2'])
     distortion_coeffs1: ndarray = np.array(stereo_params['distCoeffs1'])
@@ -176,6 +192,10 @@ def _reconstruct_stereo_params(stereo_params: Dict,
     image_size: Tuple = tuple(stereo_params['image_size'])
     rotation_matrix: ndarray = np.array(stereo_params['R'])
     translation_vector: ndarray = np.array(stereo_params['T'])
+
+    left_im: ndarray = cv2.imread(str(left_im_path))
+    right_im: ndarray = cv2.imread(str(right_im_path))
+    disparity_map: ndarray = tiff.imread(str(disparity_map_path))
 
     trimmed_disp_map: ndarray = _trim_im(im=disparity_map, desired_height=image_size[0], desired_width=image_size[1])
     trimmed_left_im: ndarray = _trim_im(im=left_im, desired_height=image_size[0], desired_width=image_size[1])
@@ -193,10 +213,8 @@ def _reconstruct_stereo_params(stereo_params: Dict,
     points_3d: ndarray = cv2.reprojectImageTo3D(disparity=trimmed_disp_map,
                                                 Q=reprojection_matrix)
 
-    # TODO: check the images (if they are in the same size and satisfy other conditions)
-
-    # TODO: save the trimmed_left_im, trimmed_right_im, points_3d to disk (so we can run the
-    #  neural network and visualize the results later)
+    # check the images (if they are in the same size and satisfy other conditions)
+    _check_image_sizes(left_im=trimmed_left_im, right_im=trimmed_right_im, points_3d=points_3d)
 
     return trimmed_left_im, trimmed_right_im, points_3d
 
@@ -204,39 +222,58 @@ def _reconstruct_stereo_params(stereo_params: Dict,
 def _do_reconstruction_opencv(left_ims_paths: List,
                               right_ims_paths: List,
                               disparity_maps_paths: List,
-                              stereo_params_path: Union[str, None]):
+                              stereo_params_path: Union[str, None],
+                              output_dir: Path):
     """
 
     :param left_ims_paths:
     :param right_ims_paths:
     :param disparity_maps_paths:
     :param stereo_params_path:
+    :param output_dir:
     :return:
     """
-
-    left_im: ndarray = cv2.imread(str(left_ims_paths[0]))
-    right_im: ndarray = cv2.imread(str(right_ims_paths[0]))
-    disparity_map: ndarray = tiff.imread(str(disparity_maps_paths[0]))
+    triplets = zip(left_ims_paths, right_ims_paths, disparity_maps_paths)
 
     if stereo_params_path is None:
-        points_3d: ndarray = _reconstruct_no_params(left_im=left_im,
-                                                    disparity_map=disparity_map)
+        pass
+        # points_3d: ndarray = _reconstruct_no_params(left_im=left_im,
+        #                                             disparity_map=disparity_map)
     else:
         stereo_params: Dict = yaml.load(stream=open(stereo_params_path),
                                         Loader=yaml.FullLoader)
-        _, _, _ = _reconstruct_stereo_params(stereo_params=stereo_params,
-                                                        left_im=left_im,
-                                                        right_im=right_im,
-                                                        disparity_map=disparity_map)
+
+        output_left_dir: Path = output_dir / 'left'
+        output_left_dir.mkdir(exist_ok=True)
+        output_right_dir: Path = output_dir / 'right'
+        output_right_dir.mkdir(exist_ok=True)
+        output_points_dir: Path = output_dir / 'points_3d'
+        output_points_dir.mkdir(exist_ok=True)
+
+        for left_path, right_path, disp_path in triplets:
+            trimmed_left_im, trimmed_right_im, points_3d = _reconstruct_stereo_params(stereo_params=stereo_params,
+                                                                                      left_im_path=left_path,
+                                                                                      right_im_path=right_path,
+                                                                                      disparity_map_path=disp_path)
+            file_name: str = left_path.name
+            file_name = file_name.split('.')[0]
+            file_name = file_name.split('_')[1]
+            # save the trimmed left im, trimmed right im
+            cv2.imwrite(filename=str(output_left_dir/('L_'+file_name+'.png')),
+                        img=trimmed_left_im)
+            cv2.imwrite(filename=str(output_right_dir/('R_'+file_name+'.png')),
+                        img=trimmed_right_im)
+            # save the 3d points
+            np.save(file=str(output_points_dir/('points_'+file_name)), arr=points_3d)
 
 
 def reconstruct_3d(cfg: DictConfig):
     """
+    Doing 3D reconstruction
 
     :return:
     """
     log.info(f'--- Start 3d reconstruction ---')
-    # log.info(f'Reconstruct configurations:\n{cfg.pretty()}')
     left_ims_paths, right_ims_paths, disparity_maps_paths = \
         _check_validity_im_dirs(left_ims_dir=cfg.left_ims_dir,
                                 right_ims_dir=cfg.right_ims_dir,
@@ -247,14 +284,10 @@ def reconstruct_3d(cfg: DictConfig):
     else:
         stereo_params_path = None
 
-    # _do_reconstruction_matlab(stereo_params_path=stereo_params_path,
-    #                           left_ims_paths=left_ims_paths,
-    #                           right_ims_paths=right_ims_paths,
-    #                           disparity_maps_paths=disparity_maps_paths)
-
     _do_reconstruction_opencv(left_ims_paths=left_ims_paths,
                               right_ims_paths=right_ims_paths,
                               disparity_maps_paths=disparity_maps_paths,
-                              stereo_params_path=stereo_params_path)
+                              stereo_params_path=stereo_params_path,
+                              output_dir=PROJECT_PATH/cfg.output_dir)
 
     log.info(f'--- Done 3d reconstruction ---')

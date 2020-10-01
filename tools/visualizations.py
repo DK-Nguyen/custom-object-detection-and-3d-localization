@@ -89,12 +89,12 @@ def visualizing_triplets(left_im: ndarray,
     :return:
     """
 
-    cv2.imshow('left im', left_im)
+    cv2.imshow('', left_im)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
-    cv2.imshow('right im', right_im)
+    cv2.imshow('', right_im)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
-    cv2.imshow('disparity map', disp_map)
+    cv2.imshow('', disp_map)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
