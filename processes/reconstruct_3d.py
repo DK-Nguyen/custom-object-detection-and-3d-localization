@@ -25,10 +25,10 @@ PROJECT_PATH = constants['project_path']
 log = logging.getLogger(__name__)  # A logger for this file
 
 
-def _check_validity_im_dirs(left_ims_dir: str,
-                            right_ims_dir: str,
-                            disparity_maps_dir: str,
-                            output_dir: str)\
+def _check_validity_input_dirs(left_ims_dir: str,
+                               right_ims_dir: str,
+                               disparity_maps_dir: str,
+                               output_dir: str)\
         -> Tuple[List, List, List]:
     """
     Check the validity of the image directories to do 3d reconstruction.
@@ -62,6 +62,52 @@ def _check_validity_im_dirs(left_ims_dir: str,
     output_dir.mkdir(exist_ok=True)
 
     return left_ims_paths, right_ims_paths, disparity_maps_paths
+
+
+def _make_output_dirs(output_dir: Path)\
+        -> Tuple[Path, Path, Path]:
+    """
+    Make the output directories.
+    :param output_dir:
+    :return:
+    """
+    output_left_dir: Path = output_dir / 'left_ims'
+    output_left_dir.mkdir(exist_ok=True)
+    output_right_dir: Path = output_dir / 'right_ims'
+    output_right_dir.mkdir(exist_ok=True)
+    output_points_dir: Path = output_dir / 'points_3d'
+    output_points_dir.mkdir(exist_ok=True)
+
+    return output_left_dir, output_right_dir, output_points_dir
+
+
+def _save_reconstruct_outputs(im_path: Path,
+                              left_im: ndarray,
+                              right_im: ndarray,
+                              points_3d: ndarray,
+                              output_left_dir: Path,
+                              output_right_dir: Path,
+                              output_points_dir: Path)\
+        -> None:
+    """
+
+    :param im_path: The path of the left image or right image of the original image
+    :param left_im: the processed left image to be saved
+    :param right_im: the processed left image to be saved
+    :param points_3d: the reconstructed 3d points
+    :return:
+    """
+    file_name: str = im_path.name
+    file_name = file_name.split('.')[0]
+    file_name = file_name.split('_')[1]
+    # save the left im, right im
+    cv2.imwrite(filename=str(output_left_dir / ('L_' + file_name + '.png')),
+                img=left_im)
+    cv2.imwrite(filename=str(output_right_dir / ('R_' + file_name + '.png')),
+                img=right_im)
+    # save the 3d points
+    np.save(file=str(output_points_dir / ('points_' + file_name)),
+            arr=points_3d)
 
 
 def _do_reconstruction_matlab(stereo_params_path: str,
@@ -241,35 +287,27 @@ def _do_reconstruction_opencv(left_ims_paths: List,
     triplets = zip(left_ims_paths, right_ims_paths, disparity_maps_paths)
 
     if stereo_params_path is None:
-        pass
+        log.info('Doing nothing yet')
         # points_3d: ndarray = _reconstruct_no_params(left_im=left_im,
         #                                             disparity_map=disparity_map)
     else:
         stereo_params: Dict = yaml.load(stream=open(stereo_params_path),
                                         Loader=yaml.FullLoader)
 
-        output_left_dir: Path = output_dir / 'left'
-        output_left_dir.mkdir(exist_ok=True)
-        output_right_dir: Path = output_dir / 'right'
-        output_right_dir.mkdir(exist_ok=True)
-        output_points_dir: Path = output_dir / 'points_3d'
-        output_points_dir.mkdir(exist_ok=True)
+        output_left_dir, output_right_dir, output_points_dir = _make_output_dirs(output_dir)
 
         for left_path, right_path, disp_path in triplets:
             trimmed_left_im, trimmed_right_im, points_3d = _reconstruct_stereo_params(stereo_params=stereo_params,
                                                                                       left_im_path=left_path,
                                                                                       right_im_path=right_path,
                                                                                       disparity_map_path=disp_path)
-            file_name: str = left_path.name
-            file_name = file_name.split('.')[0]
-            file_name = file_name.split('_')[1]
-            # save the trimmed left im, trimmed right im
-            cv2.imwrite(filename=str(output_left_dir/('L_'+file_name+'.png')),
-                        img=trimmed_left_im)
-            cv2.imwrite(filename=str(output_right_dir/('R_'+file_name+'.png')),
-                        img=trimmed_right_im)
-            # save the 3d points
-            np.save(file=str(output_points_dir/('points_'+file_name)), arr=points_3d)
+            _save_reconstruct_outputs(im_path=left_path,
+                                      left_im=trimmed_left_im,
+                                      right_im=trimmed_right_im,
+                                      points_3d=points_3d,
+                                      output_left_dir=output_left_dir,
+                                      output_right_dir=output_right_dir,
+                                      output_points_dir=output_points_dir)
 
         log.info(f'Images and 3d points are saved to {output_dir}')
 
@@ -282,10 +320,10 @@ def reconstruct_3d(cfg: DictConfig):
     """
     log.info(f'--- Start 3d reconstruction ---')
     left_ims_paths, right_ims_paths, disparity_maps_paths = \
-        _check_validity_im_dirs(left_ims_dir=cfg.left_ims_dir,
-                                right_ims_dir=cfg.right_ims_dir,
-                                disparity_maps_dir=cfg.disparity_maps_dir,
-                                output_dir=cfg.output_dir)
+        _check_validity_input_dirs(left_ims_dir=cfg.left_ims_dir,
+                                   right_ims_dir=cfg.right_ims_dir,
+                                   disparity_maps_dir=cfg.disparity_maps_dir,
+                                   output_dir=cfg.output_dir)
 
     if cfg.stereo_params is not None:
         stereo_params_path = str(PROJECT_PATH/cfg.stereo_params)
