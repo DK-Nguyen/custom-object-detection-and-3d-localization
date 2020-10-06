@@ -10,6 +10,7 @@ from numpy import ndarray
 from omegaconf import DictConfig
 import numpy as np
 import math
+from tqdm import tqdm
 
 from detectron2.config.config import CfgNode
 from detectron2.engine import DefaultPredictor
@@ -56,8 +57,6 @@ def _get_detected_points(output_instances: Dict,
     return detected_points3d
 
 
-# TODO: experiment with other test datasets
-#  (e.g. https://vision.middlebury.edu/stereo/data/scenes2014/)
 def test(cfg: DictConfig):
     """
     Running inference on an unseen dataset.
@@ -74,14 +73,13 @@ def test(cfg: DictConfig):
                                                          process='test')
     output_dir: Path = Path(os.getcwd()) / 'predicted_ims'  # using hydra, this will be PROJECT_PATH/outputs/date/time
     output_dir.mkdir(parents=False, exist_ok=True)
-    log.info(f'Predicted images are saved to {output_dir}')
 
     model_cfg: CfgNode = get_model_configs(cfg=cfg, process='test')
     predictor: DefaultPredictor = DefaultPredictor(model_cfg)
     log.info(f'Doing inference on {PROJECT_PATH/cfg.test.test_dataset_dir}...')
 
     test_ims_iter: Path.iterdir = Path(PROJECT_PATH/cfg.test.test_dataset_dir).iterdir()
-    test_im_paths = sorted([f for f in test_ims_iter if f.is_file()])
+    test_im_paths: List = sorted([f for f in test_ims_iter if f.is_file()])
 
     points_3d_paths: List = []
     if cfg.test.map_3d_points:
@@ -93,23 +91,28 @@ def test(cfg: DictConfig):
             raise Exception('The number of test images is not the same with the number'
                             'of corresponding 3d points')
 
-    for index, test_im in enumerate(test_im_paths):
-        img: ndarray = cv2.imread(str(test_im))  # [height, width, 3]
-        outputs: Dict = predictor(img)
+    total_iters: int = len(test_im_paths)
+    with tqdm(total=total_iters) as progress_bar:
+        for index, test_im in enumerate(test_im_paths):
+            img: ndarray = cv2.imread(str(test_im))  # [height, width, 3]
+            outputs: Dict = predictor(img)
 
-        detected_points3d: List = []
-        if cfg.test.map_3d_points:
-            points_3d_path: PosixPath = points_3d_paths[index]
-            points_3d: ndarray = np.load(str(points_3d_path))
-            detected_points3d = _get_detected_points(output_instances=outputs,
-                                                     points_3d=points_3d)
+            detected_points3d: List = []
+            if cfg.test.map_3d_points:
+                points_3d_path: PosixPath = points_3d_paths[index]
+                points_3d: ndarray = np.load(str(points_3d_path))
+                detected_points3d = _get_detected_points(output_instances=outputs,
+                                                         points_3d=points_3d)
 
-        # visualize the result: predicted objects (with 3d coordinates) and save to disk
-        path_to_save: str = str(output_dir / test_im.name) if cfg.test.saving_predicted_ims else None
-        visualizing_predicted_samples(img=img,
-                                      metadata=coco_tree_metadata,
-                                      predicted_samples=outputs,
-                                      points3d_predicted_samples=detected_points3d,
-                                      path_to_save=path_to_save,
-                                      show_image=cfg.test.show_predicted_ims)
+            # visualize the result: predicted objects (with 3d coordinates) and save to disk
+            path_to_save: str = str(output_dir / test_im.name) if cfg.test.saving_predicted_ims else None
+            visualizing_predicted_samples(img=img,
+                                          metadata=coco_tree_metadata,
+                                          predicted_samples=outputs,
+                                          points3d_predicted_samples=detected_points3d,
+                                          path_to_save=path_to_save,
+                                          show_image=cfg.test.show_predicted_ims)
+            progress_bar.update(1)
+
+    log.info(f'Predicted images are saved to {output_dir}')
     log.info('--- Testing Done ---')

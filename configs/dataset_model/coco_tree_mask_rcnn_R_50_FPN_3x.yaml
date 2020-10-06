@@ -20,9 +20,9 @@ dataset_model:
     show_images: 3  # 0: don't show, -1: show all, an int: number of ims to show
   test:
     option: Yes
-    test_dataset_dir: datasets/coco_tree/testing/output_3d_consecutive/left
+    test_dataset_dir: datasets/coco_tree/testing/output_3d_consecutive/left_ims
     map_3d_points: Yes
-    points_3d_path: datasets/coco_tree/testing/output_3d_reconstruction/points_3d
+    points_3d_path: datasets/coco_tree/testing/output_3d_consecutive/points_3d
     use_pretrained_weight: Yes
     pretrained_weight: weights/coco_tree_mask_rcnn.pth
     threshold: 0.5
