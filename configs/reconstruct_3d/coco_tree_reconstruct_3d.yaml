@@ -1,7 +1,7 @@
 reconstruct_3d:
     name: coco_tree_reconstruct_3d
-    left_ims_dir: datasets/coco_tree/testing/left_images
-    right_ims_dir:  datasets/coco_tree/testing/right_images
-    disparity_maps_dir: datasets/coco_tree/testing/disparity_maps
+    left_ims_dir: datasets/coco_tree/testing/input_3d_reconstruction/left_images
+    right_ims_dir:  datasets/coco_tree/testing/input_3d_reconstruction/right_images
+    disparity_maps_dir: datasets/coco_tree/testing/input_3d_reconstruction/disparity_maps
+    output_dir: datasets/coco_tree/testing/output_3d_reconstruction/
     stereo_params: datasets/coco_tree/testing/stereoParams.yaml
-    output_dir: datasets/coco_tree/testing/3d_reconstruction

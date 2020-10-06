@@ -27,14 +27,15 @@ log = logging.getLogger(__name__)  # A logger for this file
 
 def _check_validity_im_dirs(left_ims_dir: str,
                             right_ims_dir: str,
-                            disparity_maps_dir: str)\
+                            disparity_maps_dir: str,
+                            output_dir: str)\
         -> Tuple[List, List, List]:
     """
     Check the validity of the image directories to do 3d reconstruction.
 
     :return:
     """
-    # check if the directories exist
+    # check if the input directories exist
     left_images_dir: Path = PROJECT_PATH / left_ims_dir
     right_images_dir: Path = PROJECT_PATH / right_ims_dir
     disp_maps_dir: Path = PROJECT_PATH / disparity_maps_dir
@@ -55,6 +56,10 @@ def _check_validity_im_dirs(left_ims_dir: str,
     if not len(left_ims_paths) == len(right_ims_paths) == len(disparity_maps_paths):
         raise Exception(f'Left, right, and disparity directory have different '
                         f'number of images.')
+
+    # check the output dir
+    output_dir: Path = PROJECT_PATH / output_dir
+    output_dir.mkdir(exist_ok=True)
 
     return left_ims_paths, right_ims_paths, disparity_maps_paths
 
@@ -266,6 +271,8 @@ def _do_reconstruction_opencv(left_ims_paths: List,
             # save the 3d points
             np.save(file=str(output_points_dir/('points_'+file_name)), arr=points_3d)
 
+        log.info(f'Images and 3d points are saved to {output_dir}')
+
 
 def reconstruct_3d(cfg: DictConfig):
     """
@@ -277,7 +284,8 @@ def reconstruct_3d(cfg: DictConfig):
     left_ims_paths, right_ims_paths, disparity_maps_paths = \
         _check_validity_im_dirs(left_ims_dir=cfg.left_ims_dir,
                                 right_ims_dir=cfg.right_ims_dir,
-                                disparity_maps_dir=cfg.disparity_maps_dir)
+                                disparity_maps_dir=cfg.disparity_maps_dir,
+                                output_dir=cfg.output_dir)
 
     if cfg.stereo_params is not None:
         stereo_params_path = str(PROJECT_PATH/cfg.stereo_params)

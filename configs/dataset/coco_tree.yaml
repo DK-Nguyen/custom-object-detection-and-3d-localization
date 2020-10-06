@@ -13,7 +13,7 @@ dataset:
         name: coco_tree_train
         input_dir: datasets/coco_tree  # the dir that contains /foregrounds and /backgrounds dirs
         output_dir: datasets/coco_tree/training
-        num_images: 2000
+        num_images: 20
         max_foregrounds: 15
         output_width: 512
         output_height: 512
@@ -26,7 +26,7 @@ dataset:
         license_url: none
     validation_images_preparation:
         option: Yes
-        labelme_annotating: No  # annotate the ground truth manually
+        labelme_annotating: Yes  # annotate the ground truth manually
         val_images_dir: datasets/coco_tree/validation/images
         labelme_annotation_dir: datasets/coco_tree/validation/annotations
         converting_labelme_to_coco: Yes

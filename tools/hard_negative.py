@@ -37,6 +37,8 @@ class HardNegativeBackgroundPreparation:
         """
         # log.info("Preparing true-negative images")
         self.input_dir: Path = input_dir
+        self.background_dir = self.input_dir.absolute().joinpath('backgrounds')
+        self.foreground_dir = self.input_dir.absolute().joinpath('foregrounds')
         self.output_dir: Path = output_dir
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.allowed_output_types: list = ['.png', '.jpg', '.jpeg']
@@ -47,8 +49,11 @@ class HardNegativeBackgroundPreparation:
 
     def _validate_arguments(self) -> None:
         """
-        Validate the width, height, and output types
+        Validate the directories, width, height, and output types
         """
+        assert self.input_dir.exists(), f'the {self.input_dir} does not exist'
+        assert self.background_dir.exists(), f'the {self.background_dir} does not exist'
+        assert self.foreground_dir.exists(), f'the {self.foreground_dir} does not exist'
         assert self.width >= 64, 'width must be greater than 64'
         assert self.height >= 64, 'height must be greater than 64'
         assert self.output_type in self.allowed_output_types, f'output_type is not supported: {self.output_type}'
@@ -67,10 +72,8 @@ class HardNegativeBackgroundPreparation:
         """
         self._validate_arguments()
         # Open background and convert to RGBA
-        background_path = self.input_dir.absolute().joinpath('backgrounds')
-        bg_im_list = sorted(background_path.glob('*'))
-        foreground_path = self.input_dir.absolute().joinpath('foregrounds')
-        fg_im_list = sorted(foreground_path.glob('*'))
+        bg_im_list = sorted(self.background_dir.glob('*'))
+        fg_im_list = sorted(self.foreground_dir.glob('*'))
 
         im_counter = 0
         for bg_im_path in tqdm(bg_im_list):
