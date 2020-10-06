@@ -11,7 +11,7 @@ from numpy import ndarray
 import cv2
 import tifffile as tiff
 import yaml
-
+from tqdm import tqdm
 
 from matlab import mlarray
 from matlab.engine import start_matlab
@@ -296,18 +296,21 @@ def _do_reconstruction_opencv(left_ims_paths: List,
 
         output_left_dir, output_right_dir, output_points_dir = _make_output_dirs(output_dir)
 
-        for left_path, right_path, disp_path in triplets:
-            trimmed_left_im, trimmed_right_im, points_3d = _reconstruct_stereo_params(stereo_params=stereo_params,
-                                                                                      left_im_path=left_path,
-                                                                                      right_im_path=right_path,
-                                                                                      disparity_map_path=disp_path)
-            _save_reconstruct_outputs(im_path=left_path,
-                                      left_im=trimmed_left_im,
-                                      right_im=trimmed_right_im,
-                                      points_3d=points_3d,
-                                      output_left_dir=output_left_dir,
-                                      output_right_dir=output_right_dir,
-                                      output_points_dir=output_points_dir)
+        total_iters: int = len(left_ims_paths)
+        with tqdm(total=total_iters) as progress_bar:
+            for left_path, right_path, disp_path in triplets:
+                trimmed_left_im, trimmed_right_im, points_3d = _reconstruct_stereo_params(stereo_params=stereo_params,
+                                                                                          left_im_path=left_path,
+                                                                                          right_im_path=right_path,
+                                                                                          disparity_map_path=disp_path)
+                _save_reconstruct_outputs(im_path=left_path,
+                                          left_im=trimmed_left_im,
+                                          right_im=trimmed_right_im,
+                                          points_3d=points_3d,
+                                          output_left_dir=output_left_dir,
+                                          output_right_dir=output_right_dir,
+                                          output_points_dir=output_points_dir)
+                progress_bar.update(1)
 
         log.info(f'Images and 3d points are saved to {output_dir}')
 
