@@ -263,7 +263,6 @@ def _reconstruct_stereo_params(stereo_params: Dict,
 
     points_3d: ndarray = cv2.reprojectImageTo3D(disparity=trimmed_disp_map,
                                                 Q=reprojection_matrix)
-    # TODO: process points_3d to remove inf and -inf values
 
     # check the images (if they are in the same size and satisfy other conditions)
     _check_image_sizes(left_im=trimmed_left_im, right_im=trimmed_right_im, points_3d=points_3d)
