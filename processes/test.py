@@ -46,28 +46,32 @@ def _clean_points_3d(points_3d: ndarray) \
 
 
 def _process_detected_point(position: Tuple,
-                            points_3d: ndarray)\
+                            points_3d: ndarray,
+                            mode: str = "")\
         -> ndarray:
     """
-    If the 3d point is invalid (inf or -inf), set its values to be the nearest valid point's values
-    based on image point positions.
+    Process the invalid 3d point (contains inf or -inf) based on different mode.
+    If mode = "1nn", set the values of the invalid point to be the nearest valid point's values,
+    based on their positions in 2D image.
 
     :param position: the position of the detected object in (y, x) - (height, width)
     :param points_3d: the ndarray that contains 3d points (X, Y, Z) of all points
+    :param mode: values can nothing or "1nn"
     :return:
     """
-    point3d: ndarray = points_3d[position] * 1e-4
-
-    if point3d[0] == float("inf") or point3d[0] == float("-inf"):
-        valid_points_positions: List[Tuple] = _clean_points_3d(points_3d)
-        p: ndarray = np.array(position)
-        distances: List = [np.linalg.norm(p - np.array(vp)) for vp in valid_points_positions]
-        nearest_valid_point_index = np.argmin(distances)
-        nearest_valid_point_pos: Tuple = valid_points_positions[int(nearest_valid_point_index)]
-        point3d = points_3d[nearest_valid_point_pos] * 1e-4
-
-    if point3d[0] == float("inf") or point3d[0] == float("-inf"):
-        raise Exception("the point is still invalid (contains inf and -inf).")
+    if mode == "1nn":
+        point3d: ndarray = points_3d[position] * 1e-4
+        if point3d[0] == float("inf") or point3d[0] == float("-inf"):
+            valid_points_positions: List[Tuple] = _clean_points_3d(points_3d)
+            p: ndarray = np.array(position)
+            distances: List = [np.linalg.norm(p - np.array(vp)) for vp in valid_points_positions]
+            nearest_valid_point_index = np.argmin(distances)
+            nearest_valid_point_pos: Tuple = valid_points_positions[int(nearest_valid_point_index)]
+            point3d = points_3d[nearest_valid_point_pos] * 1e-4
+        if point3d[0] == float("inf") or point3d[0] == float("-inf"):
+            raise Exception("the point is still invalid (contains inf and -inf).")
+    else:
+        point3d: ndarray = points_3d[position] * 1e-4
 
     return point3d
 
@@ -97,7 +101,8 @@ def _get_detected_points(output_instances: Dict,
         middle_bottom_x: int = math.floor((box[0] + box[2])/2)
         middle_bottom: Tuple = (middle_bottom_y, middle_bottom_x)  # middle_bottom is the root of a tree
         point3d_middle_bottom: ndarray = _process_detected_point(position=middle_bottom,
-                                                                 points_3d=points_3d)
+                                                                 points_3d=points_3d,
+                                                                 mode="")
         detected_points3d.append((middle_bottom, point3d_middle_bottom))
 
     if len(detected_points3d) != len(pred_boxes):
@@ -156,6 +161,8 @@ def test(cfg: DictConfig):
 
             # visualize the result: predicted objects (with 3d coordinates) and save to disk
             path_to_save: str = str(output_dir / test_im.name) if cfg.test.saving_predicted_ims else None
+            # TODO: visualize the same detected trees with the same colors in different images
+            # TODO: change the direction of the text if they go out of the image bound
             visualizing_predicted_samples(img=img,
                                           metadata=coco_tree_metadata,
                                           predicted_samples=outputs,
@@ -166,10 +173,3 @@ def test(cfg: DictConfig):
 
     log.info(f'Predicted images are saved to {output_dir}')
     log.info('--- Testing Done ---')
-
-
-if __name__ == '__main__':
-    iris = datasets.load_iris()
-    X = iris.data[:, :2]
-    y = iris.target
-    x = 1
