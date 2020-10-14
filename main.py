@@ -1,6 +1,7 @@
 import hydra
 from omegaconf import DictConfig
 import logging
+import time
 
 from tools import dataset_creation
 from processes import train, test, validation, reconstruct_3d
@@ -27,7 +28,6 @@ def main(cfg: DictConfig) -> None:
             validation(cfg.dataset_model)
         if cfg.dataset_model.test.option:
             test(cfg.dataset_model)
-
     log.info(f'--- Exit program ---')
 
 

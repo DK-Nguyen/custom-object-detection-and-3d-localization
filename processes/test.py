@@ -11,6 +11,7 @@ from omegaconf import DictConfig
 import numpy as np
 import math
 from tqdm import tqdm
+from sklearn import datasets
 
 from detectron2.config.config import CfgNode
 from detectron2.engine import DefaultPredictor
@@ -23,6 +24,52 @@ __all__ = ['test']
 
 PROJECT_PATH = Path(__file__).parents[1]  # get directory 2 levels up
 log = logging.getLogger(__name__)  # A logger for this file
+
+
+def _clean_points_3d(points_3d: ndarray) \
+        -> List[Tuple]:
+    """
+    Remove all the points with inf and -inf values.
+    Return the positions (indices in 2D array) of the valid points.
+    :param points_3d: the ndarray that contains all 3d points (inf and -inf included)
+    :type points_3d: ndarray, shape [height, width, 3]
+    :return valid_points_positions: the positions (indices in the image 2D array) of the valid
+                                    3d points in the points_3d nd array
+    :rtype valid_points_positions: List[Tuple]
+    """
+    X: ndarray = points_3d[:, :, 0]
+    mask: ndarray = ~np.isinf(X)  # should be the same for X, Y, and Z
+    _indices_not_inf: Tuple = np.asarray(mask).nonzero()
+    valid_points_positions: List[Tuple] = [tuple(a) for a in zip(_indices_not_inf[0], _indices_not_inf[1])]
+
+    return valid_points_positions
+
+
+def _process_detected_point(position: Tuple,
+                            points_3d: ndarray)\
+        -> ndarray:
+    """
+    If the 3d point is invalid (inf or -inf), set its values to be the nearest valid point's values
+    based on image point positions.
+
+    :param position: the position of the detected object in (y, x) - (height, width)
+    :param points_3d: the ndarray that contains 3d points (X, Y, Z) of all points
+    :return:
+    """
+    point3d: ndarray = points_3d[position] * 1e-4
+
+    if point3d[0] == float("inf") or point3d[0] == float("-inf"):
+        valid_points_positions: List[Tuple] = _clean_points_3d(points_3d)
+        p: ndarray = np.array(position)
+        distances: List = [np.linalg.norm(p - np.array(vp)) for vp in valid_points_positions]
+        nearest_valid_point_index = np.argmin(distances)
+        nearest_valid_point_pos: Tuple = valid_points_positions[int(nearest_valid_point_index)]
+        point3d = points_3d[nearest_valid_point_pos] * 1e-4
+
+    if point3d[0] == float("inf") or point3d[0] == float("-inf"):
+        raise Exception("the point is still invalid (contains inf and -inf).")
+
+    return point3d
 
 
 def _get_detected_points(output_instances: Dict,
@@ -45,15 +92,12 @@ def _get_detected_points(output_instances: Dict,
     fields: Dict = instances.get_fields()
     pred_boxes: Boxes = fields['pred_boxes']  # each box has coord x1, y1, x2, y2
     detected_points3d: List[Tuple[Tuple, ndarray]] = []
-    indices_valid_points, valid_points = _clean_points_3d(points_3d)
     for box in pred_boxes:
         middle_bottom_y: int = math.floor(box[3]) - 1
         middle_bottom_x: int = math.floor((box[0] + box[2])/2)
-        middle_bottom: Tuple = (middle_bottom_y, middle_bottom_x)
-        point3d_middle_bottom: ndarray = _process_point3d(position=middle_bottom,
-                                                          points_3d=points_3d,
-                                                          valid_points_indices=indices_valid_points,
-                                                          valid_points=valid_points)
+        middle_bottom: Tuple = (middle_bottom_y, middle_bottom_x)  # middle_bottom is the root of a tree
+        point3d_middle_bottom: ndarray = _process_detected_point(position=middle_bottom,
+                                                                 points_3d=points_3d)
         detected_points3d.append((middle_bottom, point3d_middle_bottom))
 
     if len(detected_points3d) != len(pred_boxes):
@@ -61,61 +105,6 @@ def _get_detected_points(output_instances: Dict,
                         '3d points are different')
 
     return detected_points3d
-
-
-def _clean_points_3d(points_3d: ndarray) \
-        -> Tuple[List[Tuple], List[ndarray]]:
-    """
-    Remove all the points with inf and -inf values.
-    Keep the valid points together with their original indices in points_3d.
-    :param points_3d: the ndarray that contains all 3d points (inf and -inf included)
-    :type points_3d: ndarray, shape [height, width, 3]
-    :return indices_valid_points: the indices of the valid 3d points in the points_3d nd array
-            valid_points: the valid 3d points' coordinates
-    :rtype indices_valid_points: List[Tuple]
-           valid_points: List[ndarray]
-           points_3d[indices_valid_points[i]] = valid_points[i]
-    """
-    X: ndarray = points_3d[:, :, 0]
-    Y: ndarray = points_3d[:, :, 1]
-    Z: ndarray = points_3d[:, :, 2]
-    mask: ndarray = ~np.isinf(X)  # should be the same for X, Y, and Z
-    _indices_not_inf: Tuple = np.asarray(mask).nonzero()
-    valid_points_indices: List[Tuple] = [tuple(a) for a in zip(_indices_not_inf[0], _indices_not_inf[1])]
-    valid_X: ndarray = X[mask]
-    valid_Y: ndarray = Y[mask]
-    valid_Z: ndarray = Z[mask]
-
-    if valid_X.shape != valid_Y.shape \
-            or valid_X.shape != valid_Z.shape \
-            or valid_Y.shape != valid_Z.shape:
-        raise Exception("different number of valid values in X, Y, Z channels")
-
-    _valid_points = zip(valid_X, valid_Y, valid_Z)
-    valid_points: List[ndarray] = [np.array(a) for a in _valid_points]
-
-    if len(valid_points) != len(valid_points_indices):
-        raise Exception("different number of indices and valid points")
-
-    return valid_points_indices, valid_points
-
-
-def _process_point3d(position: Tuple,
-                     points_3d: ndarray,
-                     valid_points_indices: List[Tuple],
-                     valid_points: List[ndarray])\
-        -> ndarray:
-    """
-    If the point is invalid (inf or -inf), set their values to be the neighbor's values
-
-    :param position: the position of the detected object in (y, x) - (height, width)
-    :param points_3d: the ndarray that contains 3d points (X, Y, Z) of all points
-    :return:
-    """
-    point3d: ndarray = points_3d[position] * 1e-4
-    if point3d[0] == float("inf") or points_3d[0] == float("-inf"):
-        pass
-    return points_3d
 
 
 def test(cfg: DictConfig):
@@ -177,3 +166,10 @@ def test(cfg: DictConfig):
 
     log.info(f'Predicted images are saved to {output_dir}')
     log.info('--- Testing Done ---')
+
+
+if __name__ == '__main__':
+    iris = datasets.load_iris()
+    X = iris.data[:, :2]
+    y = iris.target
+    x = 1

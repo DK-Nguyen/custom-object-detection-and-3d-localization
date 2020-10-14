@@ -17,7 +17,7 @@ from matlab import mlarray
 from matlab.engine import start_matlab
 from matlab.engine.matlabengine import MatlabEngine
 
-from tools import constants, visualizing_triplets
+from tools import constants
 
 __all__ = ['reconstruct_3d']
 
@@ -144,8 +144,8 @@ def _do_reconstruction_matlab(stereo_params_path: str,
     plt.imshow(disp_im_np)
     plt.show()
     # log.info(f'--- Debugging1 ---')
-    # undistorted_im, rectified_im = eng.rectifyStereoImages(left_im, right_im, stereo_params)
-    # xyz_points = eng.reconstructScene(disp_im, stereo_params)
+    undistorted_im, rectified_im = eng.rectifyStereoImages(left_im, right_im, stereo_params)
+    xyz_points = eng.reconstructScene(disp_im, stereo_params)
     # log.info(f'--- Debugging2 ---')
 
 
@@ -165,11 +165,11 @@ def _reconstruct_no_params(left_im: ndarray,
     h, w = left_im.shape[:2]
     focal_length = 0.8 * w
     # Perspective transformation matrix
-    Q: ndarray = np.float32([[1, 0, 0, -w / 2.0],
-                             [0, -1, 0, h / 2.0],
-                             [0, 0, 0, -focal_length],
-                             [0, 0, 1, 0]])
-    points_3d: ndarray = cv2.reprojectImageTo3D(disparity_map, Q)
+    reprojection_matrix: ndarray = np.float32([[1, 0, 0, -w / 2.0],
+                                               [0, -1, 0, h / 2.0],
+                                               [0, 0, 0, -focal_length],
+                                               [0, 0, 1, 0]])
+    points_3d: ndarray = cv2.reprojectImageTo3D(disparity_map, reprojection_matrix)
     return points_3d
 
 
@@ -230,9 +230,9 @@ def _reconstruct_stereo_params(stereo_params: Dict,
     bigger than the size given in the stereo params, then do 3D points reconstruction.
 
     :param stereo_params:
-    :param left_im:
-    :param disparity_map:
-    :param output_dir:
+    :param left_im_path:
+    :param right_im_path
+    :param disparity_map_path:
     :return:
     """
 
