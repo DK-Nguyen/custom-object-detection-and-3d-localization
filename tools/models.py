@@ -34,7 +34,14 @@ def get_model_configs(cfg: DictConfig,
     model_cfg.SOLVER.BASE_LR = cfg.model.lr
     model_cfg.SOLVER.MAX_ITER = cfg.model.max_iter
     model_cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = cfg.model.batch_size_per_im
-    model_cfg.MODEL.ROI_HEADS.NUM_CLASSES = cfg.model.num_classes
+
+    # register number of thing classes for the model
+    # based on https://detectron2.readthedocs.io/tutorials/datasets.html#update-the-config-for-new-datasets
+    if 'retinanet' in cfg.model.config_url:  # for RetinaNet
+        model_cfg.MODEL.RETINANET.NUM_CLASSES = cfg.model.num_classes
+    else:  # for mask_rccn based models
+        model_cfg.MODEL.ROI_HEADS.NUM_CLASSES = cfg.model.num_classes
+
     model_cfg.OUTPUT_DIR = os.getcwd()  # using hydra, this will be PROJECT_PATH/outputs/date/time
 
     if process == 'train':
@@ -64,7 +71,12 @@ def get_model_configs(cfg: DictConfig,
             weight_path = os.path.join(model_cfg.OUTPUT_DIR, "model_final.pth")
             log.info(f'Loading trained model from {PROJECT_PATH / weight_path}')
             model_cfg.MODEL.WEIGHTS = weight_path
-        model_cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = cfg.test.threshold
+
+        if 'retinanet' in cfg.model.config_url:  # for RetinaNet
+            model_cfg.MODEL.RETINANET.SCORE_THRESH_TEST = cfg.test.threshold
+        else:  # for mask_rccn based models
+            model_cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = cfg.test.threshold
+
         model_cfg.MODEL.DEVICE = cfg.test.testing_device
 
     return model_cfg

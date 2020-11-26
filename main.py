@@ -1,7 +1,6 @@
 import hydra
 from omegaconf import DictConfig
 import logging
-import time
 
 from tools import dataset_creation
 from processes import train, test, validation, reconstruct_3d

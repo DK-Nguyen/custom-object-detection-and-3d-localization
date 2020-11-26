@@ -12,19 +12,25 @@ import matplotlib.colors as mplc
 
 from detectron2.data.catalog import Metadata
 from detectron2.utils.visualizer import Visualizer, VisImage, ColorMode
-from detectron2.utils.colormap import _COLORS
+# from detectron2.utils.colormap import _COLORS
 from detectron2.structures.instances import Instances
 
+from tools.constants import _COLORS
 
 __all__ = ['visualizing_coco_dataset', 'visualizing_predicted_samples',
            'visualizing_triplets']
 
 
 def _get_instance_fields(instances: Instances):
-    return instances.pred_boxes, \
+    try:
+        return instances.pred_boxes, \
            instances.scores, \
            instances.pred_classes, \
            instances.pred_masks
+    except:
+        return instances.pred_boxes, \
+               instances.scores, \
+               instances.pred_classes,
 
 
 def _create_text_labels(classes, scores, class_names):
@@ -49,18 +55,18 @@ def _create_text_labels(classes, scores, class_names):
     return labels
 
 
-def pick_color(rgb=False, maximum=255):
+def pick_color(rgb=False, maximum=255, color_index=0):
     """
     Args:
         rgb (bool): whether to return RGB colors or BGR colors.
         maximum (int): either 255 or 1
+        color_index (int): index of the color to pick from _COLORS
 
     Returns:
         ndarray: a vector of 3 numbers
     """
     # idx = np.random.randint(0, len(_COLORS))
-    idx = 0
-    ret = _COLORS[idx] * maximum
+    ret = _COLORS[color_index] * maximum
     if not rgb:
         ret = ret[::-1]
     return ret
@@ -138,7 +144,12 @@ def visualizing_predicted_samples(img: ndarray,
     :return: None
     """
     instances: Instances = predicted_samples['instances'].to("cpu")
-    pred_boxes, scores, pred_classes, pred_masks = _get_instance_fields(instances)
+    try:
+        pred_boxes, scores, pred_classes, pred_masks = _get_instance_fields(instances)
+    except:
+        pred_boxes, scores, pred_classes = _get_instance_fields(instances)
+        pred_masks = None
+
     circle_radius: int = 5
 
     visualizer: MyVisualizer = MyVisualizer(img[:, :, ::-1],
@@ -147,7 +158,7 @@ def visualizing_predicted_samples(img: ndarray,
                                             instance_mode=ColorMode.SEGMENTATION)
     labels = visualizer.get_labels(classes=pred_classes, scores=scores)
 
-    assigned_colors = [pick_color(rgb=True, maximum=1) for _ in range(instances.__len__())]
+    assigned_colors = [pick_color(rgb=True, maximum=1, color_index=-1) for _ in range(instances.__len__())]
 
     # out: VisImage = visualizer.draw_instance_predictions(predictions=instances)
     vis_im: VisImage = visualizer.overlay_instances(boxes=pred_boxes,
@@ -163,7 +174,7 @@ def visualizing_predicted_samples(img: ndarray,
                f"y:{point3d[1]:.2f}\n" \
                f"z:{point3d[2]:.2f}"
         vis_im = visualizer.draw_text(text=text, position=text_pos, color="w", bg_color="k")
-        vis_im = visualizer.draw_circle(circle_coord=position, color='b', radius=circle_radius)
+        vis_im = visualizer.draw_circle(circle_coord=position, color="k", radius=circle_radius)
 
     v: ndarray = vis_im.get_image()[:, :, ::-1]
 
@@ -251,5 +262,4 @@ class MyVisualizer(Visualizer):
     def get_labels(self, classes, scores):
         labels = _create_text_labels(classes, scores, self.metadata.get("thing_classes", None))
         return labels
-
 

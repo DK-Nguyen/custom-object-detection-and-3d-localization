@@ -77,7 +77,8 @@ def _process_detected_point(position: Tuple,
 
 
 def _get_detected_points(output_instances: Dict,
-                         points_3d: ndarray)\
+                         points_3d: ndarray,
+                         remove_inf_points_mode: str)\
         -> List[Tuple[Tuple, ndarray]]:
     """
     Get the 3d coordinates of the points at the middle bottom of the detected objects.
@@ -102,7 +103,7 @@ def _get_detected_points(output_instances: Dict,
         middle_bottom: Tuple = (middle_bottom_y, middle_bottom_x)  # middle_bottom is the root of a tree
         point3d_middle_bottom: ndarray = _process_detected_point(position=middle_bottom,
                                                                  points_3d=points_3d,
-                                                                 mode="")
+                                                                 mode=remove_inf_points_mode)
         detected_points3d.append((middle_bottom, point3d_middle_bottom))
 
     if len(detected_points3d) != len(pred_boxes):
@@ -114,7 +115,7 @@ def _get_detected_points(output_instances: Dict,
 
 def test(cfg: DictConfig):
     """
-    Running inference on an unseen dataset.
+    Running DNNs inference on an unseen dataset.
     :param cfg: the configuration dictionary of dataset_model.
     :return:
     """
@@ -156,13 +157,14 @@ def test(cfg: DictConfig):
             if cfg.test.map_3d_points:
                 points_3d_path: PosixPath = points_3d_paths[index]
                 points_3d: ndarray = np.load(str(points_3d_path))
-                detected_points3d: List[Tuple[Tuple, ndarray]] = _get_detected_points(output_instances=outputs,
-                                                                                      points_3d=points_3d)
+                detected_points3d: List[Tuple[Tuple, ndarray]] = \
+                    _get_detected_points(output_instances=outputs,
+                                         points_3d=points_3d,
+                                         remove_inf_points_mode=cfg.test.remove_inf_points_mode)
 
             # visualize the result: predicted objects (with 3d coordinates) and save to disk
             path_to_save: str = str(output_dir / test_im.name) if cfg.test.saving_predicted_ims else None
             # TODO: visualize the same detected trees with the same colors in different images
-            # TODO: change the direction of the text if they go out of the image bound
             visualizing_predicted_samples(img=img,
                                           metadata=coco_tree_metadata,
                                           predicted_samples=outputs,
