@@ -1,7 +1,7 @@
 dataset_model:
   name: coco_tree_retinanet_R_101_FPN_3x
   model:
-    config_url: COCO-Detection/retinanet_R_101_FPN_3x.yaml  # find in https://bit.ly/3nundcM
+    config_url: COCO-Detection/retinanet_R_101_FPN_3x.yaml  # https://bit.ly/36kvp9E
     num_workers: 2
     ims_per_batch: 2
     lr: !!float 0.0005
