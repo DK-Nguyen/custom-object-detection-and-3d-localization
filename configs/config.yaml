@@ -8,6 +8,6 @@ defaults:
   - hydra/hydra_logging: colorlog
 
 workflow:
-  dataset_creation: Yes
+  dataset_creation: No
   reconstruct_3d: No
-  dnn_method: No
+  dnn_method: Yes

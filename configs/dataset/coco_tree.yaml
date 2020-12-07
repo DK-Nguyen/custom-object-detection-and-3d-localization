@@ -9,7 +9,7 @@ dataset:
         output_type: png
         position: middle_bottom  # position can be: "middle_bottom"
     training_images_preparation:
-        option: Yes
+        option: No
         name: coco_tree_train
         input_dir: datasets/coco_tree_experiment  # the dir that contains /foregrounds and /backgrounds dirs
         output_dir: datasets/coco_tree_experiment/training_one_im
@@ -25,7 +25,7 @@ dataset:
         license_name: free
         license_url: none
     validation_images_preparation:
-        option: No
+        option: Yes
         labelme_annotating: Yes  # annotate the ground truth manually
         val_images_dir: datasets/coco_tree/validation/images
         labelme_annotation_dir: datasets/coco_tree/validation/annotations
