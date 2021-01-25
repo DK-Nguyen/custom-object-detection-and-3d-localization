@@ -11,7 +11,6 @@ from omegaconf import DictConfig
 import numpy as np
 import math
 from tqdm import tqdm
-from sklearn import datasets
 
 from detectron2.config.config import CfgNode
 from detectron2.engine import DefaultPredictor

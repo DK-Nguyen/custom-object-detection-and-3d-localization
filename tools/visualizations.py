@@ -188,7 +188,7 @@ def visualizing_predicted_samples(img: ndarray,
 
 def visualizing_triplets(left_im: ndarray,
                          right_im: ndarray,
-                         disp_map:ndarray)\
+                         disp_map: ndarray)\
         -> None:
     """
 

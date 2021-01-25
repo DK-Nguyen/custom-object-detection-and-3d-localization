@@ -12,7 +12,6 @@ from PIL import Image
 from omegaconf import DictConfig
 import logging
 
-from tools import constants
 
 __all__ = ["CocoJsonCreator"]
 

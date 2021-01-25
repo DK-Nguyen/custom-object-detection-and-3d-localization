@@ -9,5 +9,5 @@ defaults:
 
 workflow:
   dataset_creation: No
-  reconstruct_3d: No
-  dnn_method: Yes
+  reconstruct_3d: Yes
+  dnn_method: No
