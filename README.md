@@ -7,7 +7,7 @@ estimation for the detected objects. The results are detected objects with
 corresponding [x, y, z] coordinates relative to the camera.
 
 The whole pipeline could be seen in Figure 1 
-![](./images/pipelineV3.png)*Figure 1: Data processing and training pipeline*
+![](./images/pipeline.png)*Figure 1: Data processing and training pipeline*
 
 An output is shown in Figure 2
 ![](./images/output.png)*Figure 2: An example output*
