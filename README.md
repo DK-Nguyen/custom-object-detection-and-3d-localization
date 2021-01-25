@@ -3,7 +3,8 @@
 A software to automate the process of constructing the synthetic dataset
 in COCO format, training state-of-the-art neural networks from the framework 
 [Detectron2](https://github.com/facebookresearch/detectron2), and doing depth 
-estimate for the detected objects.
+estimation for the detected objects. The results are detected objects with 
+corresponding [x, y, z] coordinates relative to the camera.
 
 The whole pipeline could be seen in Figure 1 
 ![](./images/pipelineV3.png)*Figure 1: Data processing and training pipeline*
