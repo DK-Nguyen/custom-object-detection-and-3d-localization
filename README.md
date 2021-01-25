@@ -1,8 +1,8 @@
 # Custom object detection and 3D localization
 ## Overview
 A software to automate the process of constructing the synthetic dataset
-in COCO format, train state-of-the-art neural networks from the framework 
-[Detectron2](https://github.com/facebookresearch/detectron2), and do depth 
+in COCO format, training state-of-the-art neural networks from the framework 
+[Detectron2](https://github.com/facebookresearch/detectron2), and doing depth 
 estimate for the detected objects.
 
 The whole pipeline could be seen in Figure 1 
@@ -12,7 +12,11 @@ An output is shown in Figure 2
 ![](./images/output.png)*Figure 2: An example output*
 
 ## Requirements 
+TODO
 
-## Configs
+## Project structure
+TODO
 
+## How to run 
+TODO
 
