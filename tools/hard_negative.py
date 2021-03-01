@@ -1,5 +1,5 @@
 
-from random import randint
+import random
 from PIL import Image
 from pathlib import Path
 import logging
@@ -77,31 +77,52 @@ class HardNegativeBackgroundPreparation:
 
         im_counter = 0
         for bg_im_path in tqdm(bg_im_list):
+            bg_im = Image.open(bg_im_path).convert('RGBA')
+            bg_width, bg_height = bg_im.size
             for fg_im_path in fg_im_list:
                 fg_im = Image.open(fg_im_path).convert('RGBA')
-                bg_im = Image.open(bg_im_path).convert('RGBA')
-                bg_width, bg_height = bg_im.size
                 fg_width, fg_height = fg_im.size
+                # check the sizes of the background and foreground images
                 if bg_width < fg_width*2:
                     raise Exception(f"Background image {bg_im_path}'s width is less than"
                                     f"2 times foreground image {fg_im_path}'s width")
                 if bg_height < fg_height*2:
-                    raise Exception(f"Background image {bg_im_path}'s height is less than"
-                                    f"foreground image {fg_im_path}'s height + 100")
+                    print(bg_height)
+                    print(fg_height)
+                    raise Exception(f"Background image {bg_im_path}'s height is less than "
+                                    f"2 times foreground image {fg_im_path}'s height")
                 # put the foreground to the desired position
                 if position == 'middle_bottom':
                     x_pos = int((bg_width - fg_width) / 2)
                     y_pos = int(bg_height - fg_im.height)
+                elif position == 'middle_bottom_and_right':
+                    if 'tank' in fg_im_path.name:
+                        x_pos = int((bg_width - fg_width) / 2)
+                        y_pos = int(bg_height - fg_im.height)
+                    elif 'wood_pile' in fg_im_path.name:
+                        x_pos = int(bg_width - fg_width)
+                        y_pos = int((bg_height - fg_im.height)/2)
                 else:
-                    x_pos = randint(fg_width, bg_width-fg_width)
-                    y_pos = randint(fg_height, bg_height-fg_height)
+                    x_pos = random.randint(fg_width, bg_width-fg_width)
+                    y_pos = random.randint(fg_height, bg_height-fg_height)
                 bg_im.paste(fg_im, (x_pos, y_pos), mask=fg_im)
-                bg_im = bg_im.resize((self.width, self.height))
-                save_filename = f'{im_counter:0{4}}{self.output_type}'  # e.g. 0000.png
-                output_path = Path(self.output_dir / save_filename)
-                bg_im.convert('RGB').save(output_path)
-                im_counter += 1
+            # resize the image to the desired height and width, then save to disk
+            bg_im = bg_im.resize((self.width, self.height))
+            save_filename = f'{im_counter:0{4}}{self.output_type}'  # e.g. 0000.png
+            output_path = Path(self.output_dir / save_filename)
+            bg_im.convert('RGB').save(output_path)
+            im_counter += 1
 
         log.info(f'Done preparing {im_counter} hard negative background images, '
                  f'output directory: {self.output_dir}')
 
+
+if __name__ == '__main__':
+    hnbg: HardNegativeBackgroundPreparation = HardNegativeBackgroundPreparation(
+        input_dir=Path("./hn"),
+        output_dir=Path("./hnout"),
+        output_width=1920,
+        output_height=1200,
+        output_type='png'
+    )
+    hnbg.compose_images(position="middle_bottom_and_right")

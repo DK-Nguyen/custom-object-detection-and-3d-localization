@@ -161,7 +161,7 @@ class AnnotationJsonUtils:
         self.isolated_masks = dict()
         for x in range(self.width):
             for y in range(self.height):
-                pixel_rgb = self.mask_image.getpixel((x,y))
+                pixel_rgb = self.mask_image.getpixel((x, y))
                 pixel_rgb_str = str(pixel_rgb)
 
                 # If the pixel is any color other than black, add it to a respective isolated image mask
@@ -207,12 +207,12 @@ class AnnotationJsonUtils:
                 poly = Polygon(contour)
                 poly = poly.simplify(1.0, preserve_topology=False)
 
-                if (poly.area > 16): # Ignore tiny polygons
-                    if (poly.geom_type == 'MultiPolygon'):
+                if poly.area > 16:  # Ignore tiny polygons
+                    if poly.geom_type == 'MultiPolygon':
                         # if MultiPolygon, take the smallest convex Polygon containing all the points in the object
                         poly = poly.convex_hull
 
-                    if (poly.geom_type == 'Polygon'): # Ignore if still not a Polygon (could be a line or point)
+                    if poly.geom_type == 'Polygon':  # Ignore if still not a Polygon (could be a line or point)
                         polygons.append(poly)
                         segmentation = np.array(poly.exterior.coords).ravel().tolist()
                         annotation['segmentation'].append(segmentation)
@@ -283,12 +283,12 @@ class CocoJsonCreator:
         info_json = self.dataset_info['info']
         iju = InfoJsonUtils()
         return iju.create_coco_info(
-            description = info_json['description'],
-            version = info_json['version'],
-            url = info_json['url'],
-            year = info_json['year'],
-            contributor = info_json['contributor'],
-            date_created = info_json['date_created']
+            description=info_json['description'],
+            version=info_json['version'],
+            url=info_json['url'],
+            year=info_json['year'],
+            contributor=info_json['contributor'],
+            date_created=info_json['date_created']
         )
 
     def create_licenses(self):
@@ -297,9 +297,9 @@ class CocoJsonCreator:
         license_json = self.dataset_info['license']
         lju = LicenseJsonUtils()
         lic = lju.create_coco_license(
-            url = license_json['url'],
-            license_id = license_json['id'],
-            name = license_json['name']
+            url=license_json['url'],
+            license_id=license_json['id'],
+            name=license_json['name']
         )
         return [lic]
 
@@ -313,7 +313,7 @@ class CocoJsonCreator:
         cju = CategoryJsonUtils()
         categories = []
         category_ids_by_name = dict()
-        category_id = 1 # 0 is reserved for the background
+        category_id = 1  # 0 is reserved for the background
 
         super_categories = self.mask_definitions['super_categories']
         for super_category, _categories in super_categories.items():
