@@ -119,8 +119,8 @@ class HardNegativeBackgroundPreparation:
 
 if __name__ == '__main__':
     hnbg: HardNegativeBackgroundPreparation = HardNegativeBackgroundPreparation(
-        input_dir=Path("./hn"),
-        output_dir=Path("./hnout"),
+        input_dir=Path("./experiments/hn"),
+        output_dir=Path("./experiments/hnOut"),
         output_width=1920,
         output_height=1200,
         output_type='png'

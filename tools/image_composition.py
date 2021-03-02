@@ -1,5 +1,10 @@
 """
-Used together with coco_json_utils.py to create a dataset according to the COCO format
+Input: a directory that contains foregrounds and backgrounds,
+Output: a set of images with a random number of foreground objects on the background images
+        a binary mask for each image created
+        mask_definition.json contains data about the path to a mask for an image, the colors of each object
+        dataset_info.json contains meta data of the dataset
+
 Code based on https://github.com/akTwelve/cocosynth/blob/master/python/image_composition.py
 """
 import json
@@ -55,7 +60,7 @@ class MaskJsonUtils:
             # Add the category to the existing super category set
             self.super_categories[super_category].add(category)
 
-        return True # Addition was successful
+        return True  # Addition was successful
 
     def add_mask(self, image_path, mask_path, color_categories):
         """
@@ -179,9 +184,9 @@ class ImageComposition:
         self.masks_output_dir = self.output_dir / 'masks'
 
         # Create directories
-        self.output_dir.mkdir(exist_ok=True)
-        self.images_output_dir.mkdir(exist_ok=True)
-        self.masks_output_dir.mkdir(exist_ok=True)
+        self.output_dir.mkdir(exist_ok=False)
+        self.images_output_dir.mkdir(exist_ok=False)
+        self.masks_output_dir.mkdir(exist_ok=False)
 
     def _validate_and_process_input_directory(self):
         self.input_dir = PROJECT_PATH / self.cfg.input_dir
@@ -465,3 +470,24 @@ class ImageComposition:
         self._generate_images()
         self._create_info()
         log.info(f'Done composing images for {self.cfg.description}')
+
+
+if __name__ == '__main__':
+    _cfg = {'option': True,
+            'name': 'experiments',
+            'input_dir': 'tools/experiments/image_composition',
+            'output_dir': 'tools/experiments/image_composition/training',
+            'num_images': 3,
+            'max_foregrounds': 15,
+            'output_width': 512,
+            'output_height': 512,
+            'output_type': 'png',
+            'description': 'experiment',
+            'url': 'none',
+            'version': 'experiment_1.0',
+            'contributor': 'DK',
+            'license_name': 'free',
+            'license_url': 'none'}
+    cfg = DictConfig(_cfg)
+    image_comp_training: ImageComposition = ImageComposition(cfg)
+    image_comp_training.main()
