@@ -1,5 +1,8 @@
 """
-Used together with coco_json_utils.py to create a dataset according to the COCO format
+Input:
+
+
+
 Code based on https://github.com/akTwelve/cocosynth/blob/master/python/coco_json_utils.py
 """
 import numpy as np
@@ -390,34 +393,22 @@ class CocoJsonCreator:
         log.info(f'Annotations successfully written to file:\n{output_path}')
 
 
-def draw_polygon():
-    rle = [123.0, 399.5, 126.0, 398.5, 127.5, 396.0, 124.5,
-           387.0, 124.5, 367.0, 122.5, 365.0, 121.5, 359.0,
-           119.5, 332.0, 117.5, 330.0, 117.5, 297.0, 115.5,
-           291.0, 114.5, 275.0, 112.5, 207.0, 111.5, 197.0,
-           110.0, 195.5, 106.5, 197.0, 108.5, 210.0, 107.5,
-           248.0, 109.5, 255.0, 108.5, 297.0, 110.5, 300.0,
-           110.5, 313.0, 112.5, 321.0, 117.5, 382.0, 116.5,
-           388.0, 118.5, 392.0, 118.5, 398.0, 123.0, 399.5]
-
-
 if __name__ == '__main__':
     _cfg = {'option': True,
             'name': 'experiments',
             'input_dir': 'tools/experiments/image_composition',
             'output_dir': 'tools/experiments/image_composition/training',
-            'num_images': 3,
+            'num_images': 1,
             'max_foregrounds': 15,
             'output_width': 512,
             'output_height': 512,
             'output_type': 'png',
             'description': 'experiment',
             'url': 'none',
-            'version': 'experiment_1.0',
+            'version': '1.0',
             'contributor': 'DK',
             'license_name': 'free',
             'license_url': 'none'}
     cfg = DictConfig(_cfg)
-    # coco_json_creator_training: CocoJsonCreator = CocoJsonCreator(cfg)
-    # coco_json_creator_training.main()
-    draw_polygon()
+    coco_json_creator_training: CocoJsonCreator = CocoJsonCreator(cfg)
+    coco_json_creator_training.main()

@@ -1,9 +1,10 @@
 """
-Input: a directory that contains foregrounds and backgrounds,
+Input: a directory that contains foreground images and background images
 Output: a set of images with a random number of foreground objects on the background images
-        a binary mask for each image created
-        mask_definition.json contains data about the path to a mask for an image, the colors of each object
+        mask_definition.json contains data about the path to a binary mask for each image,
+        the colors of each object
         dataset_info.json contains meta data of the dataset
+        mask_definition.json and dataset_info.json are the inputs of coco_json_utils.py
 
 Code based on https://github.com/akTwelve/cocosynth/blob/master/python/image_composition.py
 """
@@ -477,14 +478,14 @@ if __name__ == '__main__':
             'name': 'experiments',
             'input_dir': 'tools/experiments/image_composition',
             'output_dir': 'tools/experiments/image_composition/training',
-            'num_images': 3,
+            'num_images': 2,
             'max_foregrounds': 15,
             'output_width': 512,
             'output_height': 512,
             'output_type': 'png',
             'description': 'experiment',
             'url': 'none',
-            'version': 'experiment_1.0',
+            'version': '1.0',
             'contributor': 'DK',
             'license_name': 'free',
             'license_url': 'none'}
