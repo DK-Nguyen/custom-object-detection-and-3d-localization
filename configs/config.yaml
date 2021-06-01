@@ -1,6 +1,6 @@
 defaults:
   - dataset: coco_tree
-  - model: mask_rcnn_R_50_FPN_3x
+  - model: retinanet_R_101_FPN_3x
     optional: true
   - dataset_model: ${defaults.0.dataset}_${defaults.1.model}
   - reconstruct_3d: ${defaults.0.dataset}_reconstruct_3d
@@ -8,6 +8,6 @@ defaults:
   - hydra/hydra_logging: colorlog
 
 workflow:
-  dataset_creation: Yes
+  dataset_creation: No
   reconstruct_3d: No
-  dnn_method: No
+  dnn_method: Yes

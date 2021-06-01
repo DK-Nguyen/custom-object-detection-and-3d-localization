@@ -163,7 +163,6 @@ def test(cfg: DictConfig):
 
             # visualize the result: predicted objects (with 3d coordinates) and save to disk
             path_to_save: str = str(output_dir / test_im.name) if cfg.test.saving_predicted_ims else None
-            # TODO: visualize the same detected trees with the same colors in different images
             visualizing_predicted_samples(img=img,
                                           metadata=coco_tree_metadata,
                                           predicted_samples=outputs,

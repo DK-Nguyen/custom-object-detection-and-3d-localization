@@ -9,24 +9,24 @@ dataset_model:
     batch_size_per_im: 128
     num_classes: 1  # only 1 class (tree)
   train:
-    option: Yes
+    option: No
     train_dataset_dir: datasets/coco_tree_tank/training
     show_images: 3  # 0: don't show, change to an int as the number of images to show
   validation:
-    option: No
+    option: Yes
     val_dataset_dir: datasets/coco_tree_tank/validation
     use_pretrained_weight: Yes
     pretrained_weight: weights/Dec03_trainMaskRCNN_R_50_FPN_3x_2000ims_lr0.0005.pth
     show_images: 3  # 0: don't show, -1: show all, an int: number of ims to show
   test:
-    option: No
-    test_dataset_dir: datasets/coco_tree/testing/output_3d_consecutive/left_ims
+    option: Yes
+    test_dataset_dir: datasets/coco_tree_tank/testing/output_3d_reconstruction/left_ims
     map_3d_points: Yes
-    remove_inf_points_mode: '1nn'  # nothing or '1nn'
-    points_3d_path: datasets/coco_tree/testing/output_3d_consecutive/points_3d
+    remove_inf_points_mode:  # nothing or '1nn'
+    points_3d_path: datasets/coco_tree_tank/testing/output_3d_reconstruction/points_3d
     use_pretrained_weight: Yes
     pretrained_weight: weights/Dec03_trainMaskRCNN_R_50_FPN_3x_2000ims_lr0.0005.pth
-    threshold: 0.5
+    threshold: 0.9
     testing_device: cuda  # use cpu or cuda
     saving_predicted_ims: Yes
     show_predicted_ims: No
