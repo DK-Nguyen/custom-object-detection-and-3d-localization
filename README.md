@@ -16,9 +16,7 @@ An output is shown in Figure 2
 `torch`>=1.8  
 `detectron2`
 
-## Project structure
-TODO
-
 ## How to run 
-TODO
-
+Change the main configurations in the file `config.yaml`.  
+Configurations for each process (preparing the dataset, training the models on a dataset, and reconstructing 3D positions) are in the `yaml` files in the directories `dataset`, `dataset_model` and `reconstruct_3d`.  
+After you are done with the configurations, run `python main.py`.
