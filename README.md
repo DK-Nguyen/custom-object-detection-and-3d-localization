@@ -13,7 +13,8 @@ An output is shown in Figure 2
 ![](./images/output.png)*Figure 2: An example output*
 
 ## Requirements 
-TODO
+`torch`>=1.8  
+`detectron2`
 
 ## Project structure
 TODO
